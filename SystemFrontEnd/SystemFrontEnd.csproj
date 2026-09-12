@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+	<ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode> <!-- dotnet (2022) -->
+	<ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>      <!-- dotnet (2022) -->
+  </PropertyGroup>
+
+</Project>
+
+<!-- 
+dotnet (2022). winforms/docs/designer/designer-high-dpi-mode.md at main · dotnet/winforms. [online] GitHub. 
+Available at: https://github.com/dotnet/winforms/blob/main/docs/designer/designer-high-dpi-mode.md [Accessed 12 Sept. 2026].
+-->

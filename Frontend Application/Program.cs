@@ -1,4 +1,4 @@
-namespace PROG7312_POE_PART_1
+namespace Frontend_Application
 {
     internal static class Program
     {
