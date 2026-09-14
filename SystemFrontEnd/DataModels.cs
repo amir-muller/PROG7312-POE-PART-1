@@ -1,4 +1,4 @@
-﻿namespace Smart_X.Api.DataModels;
+﻿namespace SystemFrontEnd;
 
 //sensor data endpoint
 public record CreateSensorDataRequest(string SensorMAC, double SensorValue);

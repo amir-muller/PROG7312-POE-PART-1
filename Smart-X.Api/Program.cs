@@ -24,17 +24,40 @@ using (var scope = app.Services.CreateScope())
 //defining api endpoints
 var api = app.MapGroup("/api/data");
 
-// POST /api/data form pushes data here
-api.MapPost("/", async (CreateDataRequest request, IDataService dataService, CancellationToken ct) =>
+//-----------------------------------------------------------------------------
+//sensor details
+//POST /api/sensors 
+var sensorApi = app.MapGroup("/api/sensors");
+
+sensorApi.MapPost("/", async (CreateSensorDetailsRequest request, IDataService dataService, CancellationToken ct) =>
 {
-    if (string.IsNullOrWhiteSpace(request.Payload))
+    if (string.IsNullOrWhiteSpace(request.SensorMAC))
+        return Results.BadRequest("MAC address is required.");
+
+    var result = await dataService.SaveSensorDetailsAsync(request, ct);
+    return Results.Created($"/api/sensors/{result.Id}", result);
+});
+
+//GET /api/sensors
+sensorApi.MapGet("/", async (IDataService dataService, CancellationToken ct) =>
+{
+    var sensors = await dataService.GetAllSensorDetailsAsync(ct);
+    return Results.Ok(sensors);
+});
+
+//-----------------------------------------------------------------------------
+
+//sensor data
+// POST /api/data form pushes data here
+api.MapPost("/", async (CreateSensorDataRequest request, IDataService dataService, CancellationToken ct) =>
+{
+    if (string.IsNullOrWhiteSpace(request.SensorMAC))
     {
-        return Results.BadRequest("Payload cannot be empty.");
+        return Results.BadRequest("Sensor MAC address cannot be empty.");
     }
 
     var result = await dataService.SaveDataAsync(request, ct);
     return Results.Created($"/api/data/{result.Id}", result);
-
 });
 
 
@@ -44,6 +67,8 @@ api.MapGet("/", async (IDataService dataService, CancellationToken ct) =>
     var data = await dataService.GetAllDataAsync(ct);
     return Results.Ok(data);
 });
+
+//-----------------------------------------------------------------------------
 
 
 //run the application

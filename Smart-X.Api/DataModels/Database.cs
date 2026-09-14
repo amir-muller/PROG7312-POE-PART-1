@@ -2,20 +2,27 @@
 
 namespace Smart_X.Api.DataModels;
 
-public class DataRecord
+public class SensorDetails
 {
     public Guid Id { get; set; }
-    public string Source { get; set; } = string.Empty;
-    public string Payload { get; set; } = string.Empty;
-    public DateTime RequestedAt { get; set; }
+    public string SensorMAC { get; set; } = string.Empty;
+    public string SensorLocation { get; set; } = string.Empty;
+    public string SensorName { get; set; } = string.Empty;
+    public string SensorCategory { get; set; } = string.Empty;
+}
+
+public class SensorDataRecord
+{
+    public Guid Id { get; set; }
+    public string SensorMAC { get; set; } = string.Empty;
+    public double SensorValue { get; set; } 
+    public DateTime TimeStamp { get; set; }
 }
 
 public class ApplicationDbContext : DbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-    public DbSet<DataRecord> DataRecords => Set<DataRecord>();
-
+    public DbSet<SensorDetails> SensorDetails => Set<SensorDetails>();
+    public DbSet<SensorDataRecord> SensorDataRecords => Set<SensorDataRecord>();
 }
-
-
