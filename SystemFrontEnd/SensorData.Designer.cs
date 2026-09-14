@@ -39,6 +39,7 @@ partial class SensorData
         txtSensorValue = new TextBox();
         cmbSensorDetailType = new ComboBox();
         panel2 = new Panel();
+        btnUploadFile = new Button();
         btnSubmitDetails = new Button();
         cmbSensorCategories = new ComboBox();
         txtSensorName = new TextBox();
@@ -48,7 +49,7 @@ partial class SensorData
         label5 = new Label();
         label4 = new Label();
         label3 = new Label();
-        btnUploadFile = new Button();
+        backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
         ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
         panel1.SuspendLayout();
         panel2.SuspendLayout();
@@ -86,6 +87,7 @@ partial class SensorData
         // 
         // panel1
         // 
+        panel1.BackColor = SystemColors.ControlLight;
         panel1.Controls.Add(btnSubmit);
         panel1.Controls.Add(label2);
         panel1.Controls.Add(label1);
@@ -149,6 +151,7 @@ partial class SensorData
         // 
         // panel2
         // 
+        panel2.BackColor = SystemColors.ControlLight;
         panel2.Controls.Add(btnUploadFile);
         panel2.Controls.Add(btnSubmitDetails);
         panel2.Controls.Add(cmbSensorCategories);
@@ -163,6 +166,16 @@ partial class SensorData
         panel2.Name = "panel2";
         panel2.Size = new Size(157, 338);
         panel2.TabIndex = 9;
+        // 
+        // btnUploadFile
+        // 
+        btnUploadFile.Location = new Point(19, 248);
+        btnUploadFile.Name = "btnUploadFile";
+        btnUploadFile.Size = new Size(115, 36);
+        btnUploadFile.TabIndex = 12;
+        btnUploadFile.Text = "Upload File";
+        btnUploadFile.UseVisualStyleBackColor = true;
+        btnUploadFile.Click += btnUploadFile_Click;
         // 
         // btnSubmitDetails
         // 
@@ -240,16 +253,6 @@ partial class SensorData
         label3.TabIndex = 0;
         label3.Text = "Sensor MAC Address";
         // 
-        // btnUploadFile
-        // 
-        btnUploadFile.Location = new Point(19, 248);
-        btnUploadFile.Name = "btnUploadFile";
-        btnUploadFile.Size = new Size(115, 36);
-        btnUploadFile.TabIndex = 12;
-        btnUploadFile.Text = "Upload File";
-        btnUploadFile.UseVisualStyleBackColor = true;
-        btnUploadFile.Click += btnUploadFile_Click;
-        // 
         // SensorData
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -293,4 +296,5 @@ partial class SensorData
     private TextBox txtSensorMAC2;
     private Button btnSubmitDetails;
     private Button btnUploadFile;
+    private System.ComponentModel.BackgroundWorker backgroundWorker1;
 }

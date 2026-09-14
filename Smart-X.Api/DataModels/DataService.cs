@@ -27,6 +27,7 @@ public class DataService : IDataService
         _db = db;
     }
 
+    //saving sensor details
     public async Task<SensorDetailsResponse> SaveSensorDetailsAsync(CreateSensorDetailsRequest request, CancellationToken ct = default)
     {
         var sensor = new SensorDetails
@@ -44,6 +45,7 @@ public class DataService : IDataService
         return new SensorDetailsResponse(sensor.Id, sensor.SensorMAC, sensor.SensorLocation, sensor.SensorName, sensor.SensorCategory);
     }
 
+    // getting all sensor details
     public async Task<List<SensorDetailsResponse>> GetAllSensorDetailsAsync(CancellationToken ct = default)
     {
         return await _db.SensorDetails
@@ -52,7 +54,7 @@ public class DataService : IDataService
             .ToListAsync(ct);
     }
 
-
+    // saving sensor data
     public async Task<SensorDataResponse> SaveDataAsync(CreateSensorDataRequest request, CancellationToken ct = default)
     {
         var record = new SensorDataRecord
@@ -69,6 +71,7 @@ public class DataService : IDataService
         return new SensorDataResponse(record.Id, record.SensorMAC, record.SensorValue, record.TimeStamp);
     }
 
+    //displaying sensor data
     public async Task<List<SensorDataResponse>> GetAllDataAsync(CancellationToken ct = default)
     {
         return await _db.SensorDataRecords
