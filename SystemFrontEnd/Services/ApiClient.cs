@@ -55,4 +55,31 @@ public class ApiClient
         var error = await response.Content.ReadAsStringAsync();
         throw new Exception($"API Error ({response.StatusCode}): {error}");
     }
+
+    //sensor attachment methods
+    public async Task<SensorAttachmentResponse?> UploadFileAsync(string sensorMAC, string fileType, string filePath)
+    {
+        using var content = new MultipartFormDataContent();
+        using var fileStream = File.OpenRead(filePath);
+        using var streamContent = new StreamContent(fileStream);
+
+        content.Add(new StringContent(sensorMAC), "sensorMAC");
+        content.Add(new StringContent(fileType), "fileType");
+        content.Add(streamContent, "file", Path.GetFileName(filePath));
+
+        var response = await _httpClient.PostAsync("api/attachments/upload", content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<SensorAttachmentResponse>();
+        }
+
+        var error = await response.Content.ReadAsStringAsync();
+        throw new Exception($"Upload failed: {error}");
+    }
+
+    public async Task<List<SensorAttachmentResponse>?> GetAttachmentsByMacAsync(string sensorMAC)
+    {
+        return await _httpClient.GetFromJsonAsync<List<SensorAttachmentResponse>>($"api/attachments/sensor/{sensorMAC}");
+    }
 }

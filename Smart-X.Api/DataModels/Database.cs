@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore; 
+using 
 
 namespace Smart_X.Api.DataModels;
 
@@ -25,4 +26,5 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<SensorDetails> SensorDetails => Set<SensorDetails>();
     public DbSet<SensorDataRecord> SensorDataRecords => Set<SensorDataRecord>();
+    public DbSet<SensorAttachment> SensorAttachments => Set<SensorAttachment>();
 }

@@ -48,6 +48,7 @@ partial class SensorData
         label5 = new Label();
         label4 = new Label();
         label3 = new Label();
+        btnUploadFile = new Button();
         ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
         panel1.SuspendLayout();
         panel2.SuspendLayout();
@@ -148,6 +149,7 @@ partial class SensorData
         // 
         // panel2
         // 
+        panel2.Controls.Add(btnUploadFile);
         panel2.Controls.Add(btnSubmitDetails);
         panel2.Controls.Add(cmbSensorCategories);
         panel2.Controls.Add(txtSensorName);
@@ -159,14 +161,14 @@ partial class SensorData
         panel2.Controls.Add(label3);
         panel2.Location = new Point(798, 44);
         panel2.Name = "panel2";
-        panel2.Size = new Size(157, 301);
+        panel2.Size = new Size(157, 338);
         panel2.TabIndex = 9;
         // 
         // btnSubmitDetails
         // 
-        btnSubmitDetails.Location = new Point(21, 245);
+        btnSubmitDetails.Location = new Point(19, 290);
         btnSubmitDetails.Name = "btnSubmitDetails";
-        btnSubmitDetails.Size = new Size(115, 36);
+        btnSubmitDetails.Size = new Size(117, 36);
         btnSubmitDetails.TabIndex = 11;
         btnSubmitDetails.Text = "Submit Details";
         btnSubmitDetails.UseVisualStyleBackColor = true;
@@ -238,6 +240,16 @@ partial class SensorData
         label3.TabIndex = 0;
         label3.Text = "Sensor MAC Address";
         // 
+        // btnUploadFile
+        // 
+        btnUploadFile.Location = new Point(19, 248);
+        btnUploadFile.Name = "btnUploadFile";
+        btnUploadFile.Size = new Size(115, 36);
+        btnUploadFile.TabIndex = 12;
+        btnUploadFile.Text = "Upload File";
+        btnUploadFile.UseVisualStyleBackColor = true;
+        btnUploadFile.Click += btnUploadFile_Click;
+        // 
         // SensorData
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -280,4 +292,5 @@ partial class SensorData
     private TextBox txtSensorLocation;
     private TextBox txtSensorMAC2;
     private Button btnSubmitDetails;
+    private Button btnUploadFile;
 }

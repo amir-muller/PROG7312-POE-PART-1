@@ -69,6 +69,44 @@ api.MapGet("/", async (IDataService dataService, CancellationToken ct) =>
 });
 
 //-----------------------------------------------------------------------------
+var attachmentApi = app.MapGroup("/api/attachments");
+
+//upload files / attachemtns
+attachmentApi.MapPost("/upload", async (HttpContext context, IDataService dataService, CancellationToken ct) =>
+{
+    var form = await context.Request.ReadFormAsync(ct);
+    var file = form.Files.GetFile("file");
+    var sensorMAC = form["sensorMAC"].ToString();
+    var fileType = form["fileType"].ToString(); 
+
+    if (file == null || file.Length == 0 || string.IsNullOrWhiteSpace(sensorMAC))
+    {
+        return Results.BadRequest("File and Sensor MAC Address are required.");
+    }
+
+    var result = await dataService.UploadAttachmentAsync(sensorMAC, fileType, file, ct);
+    return Results.Created($"/api/attachments/{result.Id}", result);
+}).DisableAntiforgery();
+
+//get file meta data
+attachmentApi.MapGet("/sensor/{sensorMAC}", async (string sensorMAC, IDataService dataService, CancellationToken ct) =>
+{
+    var attachments = await dataService.GetAttachmentsByMacAsync(sensorMAC, ct);
+    return Results.Ok(attachments);
+});
+
+//view by id
+attachmentApi.MapGet("/download/{id:guid}", async (Guid id, IDataService dataService, CancellationToken ct) =>
+{
+    var fileResult = await dataService.GetFileByIdAsync(id, ct);
+    if (fileResult == null) return Results.NotFound();
+
+    return Results.File(fileResult.Value.Data, fileResult.Value.ContentType, fileResult.Value.FileName);
+});
+
+
+//-----------------------------------------------------------------------------
+
 
 
 //run the application

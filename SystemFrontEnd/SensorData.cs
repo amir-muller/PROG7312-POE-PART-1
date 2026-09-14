@@ -1,4 +1,5 @@
 ﻿using SystemFrontEnd.Services;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace SystemFrontEnd;
 
@@ -161,8 +162,49 @@ public partial class SensorData : Form
         menuForm.Show();
     }
 
-    private void btnSubmit_Click_1(object sender, EventArgs e)
+    private async void btnUploadFile_Click(object sender, EventArgs e)
     {
+        string mac = txtSensorMAC2.Text.Trim();
+
+        if (string.IsNullOrWhiteSpace(mac))
+        {
+            MessageBox.Show("Please enter \' sensor mac address \' first", "Validation Error", MessageBoxButtons.OK);
+            return;
+        }
+
+        using OpenFileDialog openFileDialog = new OpenFileDialog
+        {
+            Filter = "Supported Files|*.png;*.jpg;*.jpeg;*.json;*.txt;*.xml;*.ini|Images|*.png;*.jpg;*.jpeg|Configs|*.json;*.txt;*.xml;*.ini",
+            Title = "Select Setup Photo or Config File"
+        };
+
+        if (openFileDialog.ShowDialog() == DialogResult.OK) //dotnet-bot (2026).
+        {
+            string extension = Path.GetExtension(openFileDialog.FileName).ToLower();
+            string fileType = (extension == ".jpg" || extension == ".jpeg" || extension == ".png")
+                ? "DeploymentPhoto"
+                : "ConfigFile";
+
+            try
+            {
+                btnUploadFile.Enabled = false;
+                var result = await _apiClient.UploadFileAsync(mac, fileType, openFileDialog.FileName);
+
+                MessageBox.Show($"File '{result?.FileName}' uploaded successfully as {fileType}!", "Upload Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Upload Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnUploadFile.Enabled = true;
+            }
+        }
 
     }
 }
+
+// referancing
+//dotnet-bot. (2026). OpenFileDialog class (system.Windows.Forms). 
+//  Microsoft.Com.https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.openfiledialog?view=windowsdesktop-10.0

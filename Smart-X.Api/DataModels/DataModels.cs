@@ -7,3 +7,13 @@ public record SensorDataResponse(Guid Id, string SensorMAC, double SensorValue, 
 //sensor details endpoint
 public record CreateSensorDetailsRequest(string SensorMAC, string SensorLocation, string SensorName, string SensorCategory);
 public record SensorDetailsResponse(Guid Id, string SensorMAC, string SensorLocation, string SensorName, string SensorCategory);
+
+//file attachment endpoint
+public record SensorAttachmentResponse(
+    Guid Id,
+    string SensorMAC,
+    string FileName,
+    string ContentType,
+    string FileType,
+    DateTime UploadedAt
+);
