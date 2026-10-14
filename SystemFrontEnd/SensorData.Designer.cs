@@ -144,10 +144,11 @@ partial class SensorData
         // 
         cmbSensorDetailType.FormattingEnabled = true;
         cmbSensorDetailType.Items.AddRange(new object[] { "Sensor Data", "Sensor Details" });
-        cmbSensorDetailType.Location = new Point(12, 12);
+        cmbSensorDetailType.Location = new Point(12, 15);
         cmbSensorDetailType.Name = "cmbSensorDetailType";
         cmbSensorDetailType.Size = new Size(221, 23);
         cmbSensorDetailType.TabIndex = 8;
+        cmbSensorDetailType.SelectedIndexChanged += cmbSensorDetailType_SelectedIndexChanged_1;
         // 
         // panel2
         // 

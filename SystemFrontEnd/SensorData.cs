@@ -1,4 +1,5 @@
-﻿using SystemFrontEnd.Services;
+﻿using System.Threading.Tasks;
+using SystemFrontEnd.Services;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace SystemFrontEnd;
@@ -10,6 +11,7 @@ public partial class SensorData : Form
     public SensorData()
     {
         InitializeComponent();
+        setDefaults();
     }
 
     private async void SensorData_Load(object sender, EventArgs e)
@@ -27,6 +29,13 @@ public partial class SensorData : Form
         UpdateUiState();
         await LoadSelectedDataAsync();
     }
+
+    private async Task setDefaults()
+    {
+        cmbSensorDetailType.SelectedIndex = 0;
+        await LoadSelectedDataAsync();
+    }
+
 
     private async void btnRefresh_Click(object sender, EventArgs e)
     {
@@ -203,6 +212,8 @@ public partial class SensorData : Form
         }
 
     }
+
+   
 }
 
 // referancing

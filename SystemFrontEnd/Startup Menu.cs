@@ -17,4 +17,9 @@ public partial class Form1 : Form
         sensorData.ShowDialog();
 
     }
+
+    private void btnRealtimeCommandandHistory_Click(object sender, EventArgs e)
+    {
+
+    }
 }
