@@ -11,7 +11,7 @@ public partial class SensorData : Form
     public SensorData()
     {
         InitializeComponent();
-        setDefaults();
+        SensorData_Load(this, EventArgs.Empty);
     }
 
     private async void SensorData_Load(object sender, EventArgs e)
@@ -30,11 +30,11 @@ public partial class SensorData : Form
         await LoadSelectedDataAsync();
     }
 
-    private async Task setDefaults()
-    {
-        cmbSensorDetailType.SelectedIndex = 0;
-        await LoadSelectedDataAsync();
-    }
+    //private async Task setDefaults()
+    //{
+    //    cmbSensorDetailType.SelectedIndex = 0;
+    //    await LoadSelectedDataAsync();
+    //}
 
 
     private async void btnRefresh_Click(object sender, EventArgs e)
@@ -213,7 +213,6 @@ public partial class SensorData : Form
 
     }
 
-   
 }
 
 // referancing

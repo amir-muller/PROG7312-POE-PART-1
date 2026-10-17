@@ -32,7 +32,7 @@ public class DataService : IDataService
     {
         var sensor = new SensorDetails
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.NewGuid(), 
             SensorMAC = request.SensorMAC,
             SensorLocation = request.SensorLocation,
             SensorName = request.SensorName,

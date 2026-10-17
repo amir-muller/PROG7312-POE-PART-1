@@ -33,6 +33,7 @@
             btnNetworkTopology = new Button();
             btnRealtimeCommandandHistory = new Button();
             btnSensorData = new Button();
+            btnClose = new Button();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -95,11 +96,22 @@
             btnSensorData.UseVisualStyleBackColor = true;
             btnSensorData.Click += btnSensorData_Click;
             // 
+            // btnClose
+            // 
+            btnClose.Location = new Point(422, 269);
+            btnClose.Name = "btnClose";
+            btnClose.Size = new Size(142, 23);
+            btnClose.TabIndex = 4;
+            btnClose.Text = "Close";
+            btnClose.UseVisualStyleBackColor = true;
+            btnClose.Click += btnClose_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(576, 276);
+            ClientSize = new Size(576, 300);
+            Controls.Add(btnClose);
             Controls.Add(panel1);
             Margin = new Padding(3, 2, 3, 2);
             Name = "Form1";
@@ -115,5 +127,6 @@
         private Button btnNetworkTopology;
         private Button btnRealtimeCommandandHistory;
         private Button btnSensorData;
+        private Button btnClose;
     }
 }
