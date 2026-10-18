@@ -40,14 +40,19 @@
             lblSearch = new Label();
             txbSearch = new TextBox();
             backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            chartPanel = new Panel();
+            dataGridView1 = new DataGridView();
+            dataGridView2 = new DataGridView();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView2).BeginInit();
             SuspendLayout();
             // 
             // btnGoHome
             // 
             btnGoHome.BackColor = SystemColors.ControlLight;
-            btnGoHome.Location = new Point(853, 547);
+            btnGoHome.Location = new Point(1102, 579);
             btnGoHome.Name = "btnGoHome";
             btnGoHome.Size = new Size(218, 49);
             btnGoHome.TabIndex = 0;
@@ -60,9 +65,9 @@
             panel1.BackColor = SystemColors.ControlLight;
             panel1.Controls.Add(lblMocSensor);
             panel1.Controls.Add(label3);
-            panel1.Location = new Point(853, 267);
+            panel1.Location = new Point(1102, 12);
             panel1.Name = "panel1";
-            panel1.Size = new Size(218, 264);
+            panel1.Size = new Size(218, 183);
             panel1.TabIndex = 1;
             // 
             // lblMocSensor
@@ -93,7 +98,7 @@
             panel2.Controls.Add(btnSearch);
             panel2.Controls.Add(lblSearch);
             panel2.Controls.Add(txbSearch);
-            panel2.Location = new Point(643, 12);
+            panel2.Location = new Point(12, 12);
             panel2.Name = "panel2";
             panel2.Size = new Size(428, 129);
             panel2.TabIndex = 2;
@@ -139,7 +144,7 @@
             // 
             lblSearch.AutoSize = true;
             lblSearch.Font = new Font("Segoe UI", 18F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblSearch.Location = new Point(12, 10);
+            lblSearch.Location = new Point(12, 11);
             lblSearch.Name = "lblSearch";
             lblSearch.Size = new Size(185, 32);
             lblSearch.TabIndex = 1;
@@ -152,11 +157,38 @@
             txbSearch.Size = new Size(298, 23);
             txbSearch.TabIndex = 0;
             // 
+            // chartPanel
+            // 
+            chartPanel.Location = new Point(12, 147);
+            chartPanel.Name = "chartPanel";
+            chartPanel.Size = new Size(428, 223);
+            chartPanel.TabIndex = 3;
+            // 
+            // dataGridView1
+            // 
+            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Location = new Point(12, 376);
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.Size = new Size(428, 231);
+            dataGridView1.TabIndex = 4;
+            dataGridView1.CellContentClick += dataGridView1_CellContentClick;
+            // 
+            // dataGridView2
+            // 
+            dataGridView2.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView2.Location = new Point(446, 12);
+            dataGridView2.Name = "dataGridView2";
+            dataGridView2.Size = new Size(428, 595);
+            dataGridView2.TabIndex = 5;
+            // 
             // frmCommandStream
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1083, 608);
+            ClientSize = new Size(1332, 640);
+            Controls.Add(dataGridView1);
+            Controls.Add(dataGridView2);
+            Controls.Add(chartPanel);
             Controls.Add(panel2);
             Controls.Add(panel1);
             Controls.Add(btnGoHome);
@@ -166,6 +198,8 @@
             panel1.PerformLayout();
             panel2.ResumeLayout(false);
             panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView2).EndInit();
             ResumeLayout(false);
         }
 
@@ -183,5 +217,8 @@
         private Label lblFilter;
         private Label lblMocSensor;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private Panel chartPanel;
+        private DataGridView dataGridView1;
+        private DataGridView dataGridView2;
     }
 }
