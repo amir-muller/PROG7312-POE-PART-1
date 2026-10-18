@@ -213,6 +213,10 @@ public partial class SensorData : Form
 
     }
 
+    private void cmbSensorCategories_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
 }
 
 // referancing

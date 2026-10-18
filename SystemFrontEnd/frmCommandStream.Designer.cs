@@ -28,25 +28,28 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             btnGoHome = new Button();
             panel1 = new Panel();
+            btnTriggerPump = new Button();
+            lblStatus = new Label();
+            label1 = new Label();
             lblMocSensor = new Label();
             label3 = new Label();
             panel2 = new Panel();
-            cmbFilter = new ComboBox();
+            cmbFilterCategory = new ComboBox();
             lblFilter = new Label();
-            btnFilter = new Button();
-            btnSearch = new Button();
             lblSearch = new Label();
-            txbSearch = new TextBox();
+            txtSearch = new TextBox();
             backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             chartPanel = new Panel();
-            dataGridView1 = new DataGridView();
-            dataGridView2 = new DataGridView();
+            dgvDevices = new DataGridView();
+            dgvTelemetry = new DataGridView();
+            RefreshTimer = new System.Windows.Forms.Timer(components);
             panel1.SuspendLayout();
             panel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)dataGridView2).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvDevices).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvTelemetry).BeginInit();
             SuspendLayout();
             // 
             // btnGoHome
@@ -63,12 +66,41 @@
             // panel1
             // 
             panel1.BackColor = SystemColors.ControlLight;
+            panel1.Controls.Add(btnTriggerPump);
+            panel1.Controls.Add(lblStatus);
+            panel1.Controls.Add(label1);
             panel1.Controls.Add(lblMocSensor);
             panel1.Controls.Add(label3);
             panel1.Location = new Point(1102, 12);
             panel1.Name = "panel1";
             panel1.Size = new Size(218, 183);
             panel1.TabIndex = 1;
+            // 
+            // btnTriggerPump
+            // 
+            btnTriggerPump.Location = new Point(3, 114);
+            btnTriggerPump.Name = "btnTriggerPump";
+            btnTriggerPump.Size = new Size(75, 44);
+            btnTriggerPump.TabIndex = 5;
+            btnTriggerPump.Text = "Trigger Pump";
+            btnTriggerPump.UseVisualStyleBackColor = true;
+            btnTriggerPump.Click += btnTriggerPump_Click;
+            // 
+            // lblStatus
+            // 
+            lblStatus.AutoSize = true;
+            lblStatus.Location = new Point(3, 157);
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new Size(0, 15);
+            lblStatus.TabIndex = 4;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(3, 114);
+            label1.Name = "label1";
+            label1.Size = new Size(0, 15);
+            label1.TabIndex = 3;
             // 
             // lblMocSensor
             // 
@@ -92,24 +124,25 @@
             // panel2
             // 
             panel2.BackColor = SystemColors.ControlLight;
-            panel2.Controls.Add(cmbFilter);
+            panel2.Controls.Add(cmbFilterCategory);
             panel2.Controls.Add(lblFilter);
-            panel2.Controls.Add(btnFilter);
-            panel2.Controls.Add(btnSearch);
             panel2.Controls.Add(lblSearch);
-            panel2.Controls.Add(txbSearch);
+            panel2.Controls.Add(txtSearch);
             panel2.Location = new Point(12, 12);
             panel2.Name = "panel2";
-            panel2.Size = new Size(428, 129);
+            panel2.Size = new Size(320, 129);
             panel2.TabIndex = 2;
             // 
-            // cmbFilter
+            // cmbFilterCategory
             // 
-            cmbFilter.FormattingEnabled = true;
-            cmbFilter.Location = new Point(149, 97);
-            cmbFilter.Name = "cmbFilter";
-            cmbFilter.Size = new Size(121, 23);
-            cmbFilter.TabIndex = 5;
+            cmbFilterCategory.FormattingEnabled = true;
+            cmbFilterCategory.Items.AddRange(new object[] { "Ground Moisture ", "Valve State", "Tempreture " });
+            cmbFilterCategory.Location = new Point(149, 97);
+            cmbFilterCategory.Name = "cmbFilterCategory";
+            cmbFilterCategory.Size = new Size(161, 23);
+            cmbFilterCategory.TabIndex = 5;
+            cmbFilterCategory.Text = "Select Device Catagory";
+            cmbFilterCategory.SelectedIndexChanged += cmbFilterCategory_SelectedIndexChanged;
             // 
             // lblFilter
             // 
@@ -121,25 +154,6 @@
             lblFilter.TabIndex = 4;
             lblFilter.Text = "Filter by Catagory:";
             // 
-            // btnFilter
-            // 
-            btnFilter.Location = new Point(213, 10);
-            btnFilter.Name = "btnFilter";
-            btnFilter.Size = new Size(97, 33);
-            btnFilter.TabIndex = 3;
-            btnFilter.Text = "Filter";
-            btnFilter.UseVisualStyleBackColor = true;
-            // 
-            // btnSearch
-            // 
-            btnSearch.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnSearch.Location = new Point(316, 10);
-            btnSearch.Name = "btnSearch";
-            btnSearch.Size = new Size(99, 64);
-            btnSearch.TabIndex = 2;
-            btnSearch.Text = "Search";
-            btnSearch.UseVisualStyleBackColor = true;
-            // 
             // lblSearch
             // 
             lblSearch.AutoSize = true;
@@ -149,13 +163,15 @@
             lblSearch.Size = new Size(185, 32);
             lblSearch.TabIndex = 1;
             lblSearch.Text = "Search Function";
+            lblSearch.Click += lblSearch_Click;
             // 
-            // txbSearch
+            // txtSearch
             // 
-            txbSearch.Location = new Point(12, 51);
-            txbSearch.Name = "txbSearch";
-            txbSearch.Size = new Size(298, 23);
-            txbSearch.TabIndex = 0;
+            txtSearch.Location = new Point(12, 51);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(298, 23);
+            txtSearch.TabIndex = 0;
+            txtSearch.TextChanged += txtSearch_TextChanged;
             // 
             // chartPanel
             // 
@@ -164,42 +180,44 @@
             chartPanel.Size = new Size(428, 223);
             chartPanel.TabIndex = 3;
             // 
-            // dataGridView1
+            // dgvDevices
             // 
-            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(12, 376);
-            dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(428, 231);
-            dataGridView1.TabIndex = 4;
-            dataGridView1.CellContentClick += dataGridView1_CellContentClick;
+            dgvDevices.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvDevices.Location = new Point(12, 376);
+            dgvDevices.Name = "dgvDevices";
+            dgvDevices.Size = new Size(428, 231);
+            dgvDevices.TabIndex = 4;
+            dgvDevices.CellContentClick += dataGridView1_CellContentClick;
             // 
-            // dataGridView2
+            // dgvTelemetry
             // 
-            dataGridView2.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView2.Location = new Point(446, 12);
-            dataGridView2.Name = "dataGridView2";
-            dataGridView2.Size = new Size(428, 595);
-            dataGridView2.TabIndex = 5;
+            dgvTelemetry.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvTelemetry.Location = new Point(446, 12);
+            dgvTelemetry.Name = "dgvTelemetry";
+            dgvTelemetry.Size = new Size(428, 595);
+            dgvTelemetry.TabIndex = 5;
             // 
             // frmCommandStream
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1332, 640);
-            Controls.Add(dataGridView1);
-            Controls.Add(dataGridView2);
+            Controls.Add(dgvDevices);
+            Controls.Add(dgvTelemetry);
             Controls.Add(chartPanel);
             Controls.Add(panel2);
             Controls.Add(panel1);
             Controls.Add(btnGoHome);
             Name = "frmCommandStream";
             Text = "frmCommandStream";
+            FormClosing += frmCommandStream_FormClosing;
+            Load += frmCommandStream_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             panel2.ResumeLayout(false);
             panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
-            ((System.ComponentModel.ISupportInitialize)dataGridView2).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvDevices).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvTelemetry).EndInit();
             ResumeLayout(false);
         }
 
@@ -209,16 +227,18 @@
         private Panel panel1;
         private Label label3;
         private Panel panel2;
-        private Button btnSearch;
         private Label lblSearch;
-        private TextBox txbSearch;
-        private Button btnFilter;
-        private ComboBox cmbFilter;
+        private TextBox txtSearch;
+        private ComboBox cmbFilterCategory;
         private Label lblFilter;
         private Label lblMocSensor;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private Panel chartPanel;
-        private DataGridView dataGridView1;
-        private DataGridView dataGridView2;
+        private DataGridView dgvDevices;
+        private DataGridView dgvTelemetry;
+        private System.Windows.Forms.Timer RefreshTimer;
+        private Label label1;
+        private Label lblStatus;
+        private Button btnTriggerPump;
     }
 }

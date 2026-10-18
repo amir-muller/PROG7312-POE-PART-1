@@ -195,6 +195,7 @@ partial class SensorData
         cmbSensorCategories.Name = "cmbSensorCategories";
         cmbSensorCategories.Size = new Size(117, 23);
         cmbSensorCategories.TabIndex = 10;
+        cmbSensorCategories.SelectedIndexChanged += cmbSensorCategories_SelectedIndexChanged;
         // 
         // txtSensorName
         // 

@@ -82,4 +82,33 @@ public class ApiClient
     {
         return await _httpClient.GetFromJsonAsync<List<SensorAttachmentResponse>>($"api/attachments/sensor/{sensorMAC}");
     }
+
+
+
+
+    //
+    public async Task<Dictionary<string, object>?> GetCommandStreamStateAsync()
+    {
+        return await _httpClient.GetFromJsonAsync<Dictionary<string, object>>("api/data/stream-state");
+    }
+
+    public async Task<string?> PostManualOverrideAsync(string command)
+    {
+        var response = await _httpClient.PostAsJsonAsync("api/data/override", new { Command = command });
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadAsStringAsync();
+        }
+        return null;
+    }
+
+    public async Task<string?> UndoOverrideAsync()
+    {
+        var response = await _httpClient.PostAsync("api/data/override/undo", null);
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadAsStringAsync();
+        }
+        return null;
+    }
 }
