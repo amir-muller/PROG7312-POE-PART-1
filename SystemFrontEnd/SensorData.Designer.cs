@@ -190,7 +190,7 @@ partial class SensorData
         // cmbSensorCategories
         // 
         cmbSensorCategories.FormattingEnabled = true;
-        cmbSensorCategories.Items.AddRange(new object[] { "Ground Moisture ", "Valve State", "Tempreture " });
+        cmbSensorCategories.Items.AddRange(new object[] { "Temperature", "Moisture" });
         cmbSensorCategories.Location = new Point(19, 203);
         cmbSensorCategories.Name = "cmbSensorCategories";
         cmbSensorCategories.Size = new Size(117, 23);

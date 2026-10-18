@@ -55,9 +55,9 @@
             // btnGoHome
             // 
             btnGoHome.BackColor = SystemColors.ControlLight;
-            btnGoHome.Location = new Point(1102, 579);
+            btnGoHome.Location = new Point(1114, 610);
             btnGoHome.Name = "btnGoHome";
-            btnGoHome.Size = new Size(218, 49);
+            btnGoHome.Size = new Size(206, 49);
             btnGoHome.TabIndex = 0;
             btnGoHome.Text = "Go Home";
             btnGoHome.UseVisualStyleBackColor = false;
@@ -71,14 +71,14 @@
             panel1.Controls.Add(label1);
             panel1.Controls.Add(lblMocSensor);
             panel1.Controls.Add(label3);
-            panel1.Location = new Point(1102, 12);
+            panel1.Location = new Point(1111, 12);
             panel1.Name = "panel1";
-            panel1.Size = new Size(218, 183);
+            panel1.Size = new Size(219, 580);
             panel1.TabIndex = 1;
             // 
             // btnTriggerPump
             // 
-            btnTriggerPump.Location = new Point(3, 114);
+            btnTriggerPump.Location = new Point(20, 114);
             btnTriggerPump.Name = "btnTriggerPump";
             btnTriggerPump.Size = new Size(75, 44);
             btnTriggerPump.TabIndex = 5;
@@ -136,7 +136,6 @@
             // cmbFilterCategory
             // 
             cmbFilterCategory.FormattingEnabled = true;
-            cmbFilterCategory.Items.AddRange(new object[] { "Ground Moisture ", "Valve State", "Tempreture " });
             cmbFilterCategory.Location = new Point(149, 97);
             cmbFilterCategory.Name = "cmbFilterCategory";
             cmbFilterCategory.Size = new Size(161, 23);
@@ -177,7 +176,7 @@
             // 
             chartPanel.Location = new Point(12, 147);
             chartPanel.Name = "chartPanel";
-            chartPanel.Size = new Size(428, 223);
+            chartPanel.Size = new Size(602, 223);
             chartPanel.TabIndex = 3;
             // 
             // dgvDevices
@@ -185,23 +184,23 @@
             dgvDevices.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvDevices.Location = new Point(12, 376);
             dgvDevices.Name = "dgvDevices";
-            dgvDevices.Size = new Size(428, 231);
+            dgvDevices.Size = new Size(602, 231);
             dgvDevices.TabIndex = 4;
             dgvDevices.CellContentClick += dataGridView1_CellContentClick;
             // 
             // dgvTelemetry
             // 
             dgvTelemetry.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvTelemetry.Location = new Point(446, 12);
+            dgvTelemetry.Location = new Point(620, 12);
             dgvTelemetry.Name = "dgvTelemetry";
-            dgvTelemetry.Size = new Size(428, 595);
+            dgvTelemetry.Size = new Size(485, 595);
             dgvTelemetry.TabIndex = 5;
             // 
             // frmCommandStream
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1332, 640);
+            ClientSize = new Size(1350, 671);
             Controls.Add(dgvDevices);
             Controls.Add(dgvTelemetry);
             Controls.Add(chartPanel);
@@ -211,6 +210,7 @@
             Name = "frmCommandStream";
             Text = "frmCommandStream";
             FormClosing += frmCommandStream_FormClosing;
+            FormClosed += frmCommandStream_FormClosed;
             Load += frmCommandStream_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();

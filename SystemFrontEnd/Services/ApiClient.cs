@@ -92,9 +92,15 @@ public class ApiClient
         return await _httpClient.GetFromJsonAsync<Dictionary<string, object>>("api/data/stream-state");
     }
 
-    public async Task<string?> PostManualOverrideAsync(string command)
+    public async Task<string?> PostManualOverrideAsync(string command, List<string> targetMacs)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/data/override", new { Command = command });
+        var requestBody = new
+        {
+            Command = command,
+            TargetMACs = targetMacs
+        };
+
+        var response = await _httpClient.PostAsJsonAsync("api/data/override", requestBody);
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadAsStringAsync();

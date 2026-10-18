@@ -1,7 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Smart_X.Api.DataModels;
+using Smart_X.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+//sensor manager
+builder.Services.AddSingleton<RealTimeSensorManager>();
+
+//background sim worker
+builder.Services.AddHostedService<SensorSimulatorService>();
 
 //database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -10,14 +18,19 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 //reg data service
 builder.Services.AddScoped<IDataService, DataService>();
 
-var app = builder.Build();
 
+
+
+
+
+var app = builder.Build();
 
 
 //create database on startup if not there
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.EnsureDeletedAsync().Wait();
     db.Database.EnsureCreated();
 }
 
@@ -107,7 +120,7 @@ attachmentApi.MapGet("/download/{id:guid}", async (Guid id, IDataService dataSer
 
 //-----------------------------------------------------------------------------
 
-
+//manual override endpoints
 
 //run the application
 app.Run();
