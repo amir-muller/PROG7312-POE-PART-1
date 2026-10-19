@@ -271,10 +271,10 @@ namespace SystemFrontEnd
 
         private async void btnTriggerPump_Click(object sender, EventArgs e)
         {
-            string command = "Manual Override: Trigger Water Pump";
-            await _apiClient.PostManualOverrideAsync(command);
-            if (lblStatus != null) lblStatus.Text = $"Command Sent: {command}";
-            await LoadDashboardDataAsync();
+        //    string command = "Manual Override: Trigger Water Pump";
+        //    await _apiClient.PostManualOverrideAsync(command);
+        //    if (lblStatus != null) lblStatus.Text = $"Command Sent: {command}";
+        //    await LoadDashboardDataAsync();
         }
 
         private void frmCommandStream_FormClosing(object sender, FormClosingEventArgs e)

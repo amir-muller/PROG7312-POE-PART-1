@@ -55,9 +55,9 @@
             // btnGoHome
             // 
             btnGoHome.BackColor = SystemColors.ControlLight;
-            btnGoHome.Location = new Point(1114, 610);
+            btnGoHome.Location = new Point(620, 558);
             btnGoHome.Name = "btnGoHome";
-            btnGoHome.Size = new Size(206, 49);
+            btnGoHome.Size = new Size(485, 49);
             btnGoHome.TabIndex = 0;
             btnGoHome.Text = "Go Home";
             btnGoHome.UseVisualStyleBackColor = false;
@@ -71,14 +71,14 @@
             panel1.Controls.Add(label1);
             panel1.Controls.Add(lblMocSensor);
             panel1.Controls.Add(label3);
-            panel1.Location = new Point(1111, 12);
+            panel1.Location = new Point(338, 12);
             panel1.Name = "panel1";
-            panel1.Size = new Size(219, 580);
+            panel1.Size = new Size(276, 129);
             panel1.TabIndex = 1;
             // 
             // btnTriggerPump
             // 
-            btnTriggerPump.Location = new Point(20, 114);
+            btnTriggerPump.Location = new Point(9, 76);
             btnTriggerPump.Name = "btnTriggerPump";
             btnTriggerPump.Size = new Size(75, 44);
             btnTriggerPump.TabIndex = 5;
@@ -193,14 +193,14 @@
             dgvTelemetry.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvTelemetry.Location = new Point(620, 12);
             dgvTelemetry.Name = "dgvTelemetry";
-            dgvTelemetry.Size = new Size(485, 595);
+            dgvTelemetry.Size = new Size(485, 540);
             dgvTelemetry.TabIndex = 5;
             // 
             // frmCommandStream
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1350, 671);
+            ClientSize = new Size(1115, 613);
             Controls.Add(dgvDevices);
             Controls.Add(dgvTelemetry);
             Controls.Add(chartPanel);

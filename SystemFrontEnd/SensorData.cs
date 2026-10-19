@@ -213,9 +213,14 @@ public partial class SensorData : Form
 
     }
 
-    private void cmbSensorCategories_SelectedIndexChanged(object sender, EventArgs e)
+    private async void cmbSensorCategories_SelectedIndexChanged(object sender, EventArgs e)
     {
+        await LoadSelectedDataAsync();
+    }
 
+    private async void cmbSensorDetailType_SelectedIndexChanged_1(object sender, EventArgs e)
+    {
+        await LoadSelectedDataAsync();
     }
 }
 
