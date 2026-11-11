@@ -61,7 +61,6 @@
             // 
             // btnNetworkTopology
             // 
-            btnNetworkTopology.Enabled = false;
             btnNetworkTopology.Font = new Font("Arial Narrow", 10.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
             btnNetworkTopology.Location = new Point(342, 124);
             btnNetworkTopology.Margin = new Padding(3, 2, 3, 2);
@@ -70,6 +69,7 @@
             btnNetworkTopology.TabIndex = 3;
             btnNetworkTopology.Text = "Network Topology and Mesh Routing";
             btnNetworkTopology.UseVisualStyleBackColor = true;
+            btnNetworkTopology.Click += btnNetworkTopology_Click;
             // 
             // btnRealtimeCommandandHistory
             // 

@@ -34,4 +34,14 @@ public partial class Form1 : Form
         //close
         this.Close();
     }
+
+    private void btnNetworkTopology_Click(object sender, EventArgs e)
+    {
+        //hide this
+        this.Hide();
+
+        //open the topology page
+        frmNetworkTopology networkTopology = new frmNetworkTopology();
+        networkTopology.ShowDialog();
+    }
 }
