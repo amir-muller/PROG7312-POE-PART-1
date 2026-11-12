@@ -46,12 +46,21 @@ var api = app.MapGroup("/api/data");
 //sensor details
 var sensorApi = app.MapGroup("/api/sensors");
 
-sensorApi.MapPost("/", async (CreateSensorDetailsRequest request, IDataService dataService, CancellationToken ct) =>
+// Combined POST endpoint for registering sensors and auto-linking proximity neighbors
+sensorApi.MapPost("/", async (CreateSensorDetailsRequest request, IDataService dataService, NetworkAnalysisEngine engine, CancellationToken ct) =>
 {
     if (string.IsNullOrWhiteSpace(request.SensorMAC))
         return Results.BadRequest("MAC address is required.");
 
+    //Save to database
     var result = await dataService.SaveSensorDetailsAsync(request, ct);
+
+    //Get all current sensors
+    var allSensors = await dataService.GetAllSensorDetailsAsync(ct);
+
+    //link new node to its 3 closest neighbors based on location
+    engine.ConnectNewNodeWithNearestNeighbors(result, allSensors);
+
     return Results.Created($"/api/sensors/{result.Id}", result);
 });
 
@@ -107,6 +116,8 @@ api.MapGet("/range", async (string sensorMac, string start, string end, IDataSer
     var rangeResults = bst.RangeQuery(parsedStart, parsedEnd);
     return Results.Ok(rangeResults);
 });
+
+
 
 //-----------------------------------------------------------------------------
 //topology analysis endpoints

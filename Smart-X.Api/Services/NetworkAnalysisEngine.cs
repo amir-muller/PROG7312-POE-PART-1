@@ -216,4 +216,58 @@ public class NetworkAnalysisEngine
         path.Reverse(); // Gateway to Target Node
         return path;
     }
+
+    public void ConnectNewNodeWithNearestNeighbors(SensorDetailsResponse newSensor, List<SensorDetailsResponse> allSensors)
+    {
+        string newNodeName = newSensor.SensorName;
+
+        if (!_adjacencyList.ContainsKey(newNodeName))
+        {
+            _adjacencyList[newNodeName] = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        //add default gateway connection to node
+        AddEdge("Gateway Router", newNodeName, 2.0);
+
+        //calc distance
+        var distances = new List<(string NodeName, double Distance)>();
+
+        foreach (var other in allSensors)
+        {
+            if (other.SensorMAC.Equals(newSensor.SensorMAC, StringComparison.OrdinalIgnoreCase))
+                continue; // Skip self
+
+            double distance = CalculateProximityMetric(newSensor, other);
+            distances.Add((other.SensorName, distance));
+        }
+
+
+        // select closest 3 nodes,
+        var closestNeighbors = distances.OrderBy(d => d.Distance).Take(3);
+
+        foreach (var neighbor in closestNeighbors)
+        {
+            //Add undirected edge with weight proportional to distance
+            AddEdge(newNodeName, neighbor.NodeName, Math.Round(neighbor.Distance, 2));
+        }
+
+    }
+
+
+    private double CalculateProximityMetric(SensorDetailsResponse a, SensorDetailsResponse b)
+    {
+        // if in same location smal proximity
+        if (a.SensorLocation.Equals(b.SensorLocation, StringComparison.OrdinalIgnoreCase))
+        {
+            return 1.0;
+        }
+
+        // Otherwise, calc distance based on mac hash
+        int hashA = Math.Abs(a.SensorMAC.GetHashCode());
+        int hashB = Math.Abs(b.SensorMAC.GetHashCode());
+
+        return Math.Abs(hashA % 50 - hashB % 50) + 2.0;
+    }
+
+
 }

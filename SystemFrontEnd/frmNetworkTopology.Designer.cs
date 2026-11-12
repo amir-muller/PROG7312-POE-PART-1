@@ -30,12 +30,12 @@
         {
             panel1 = new Panel();
             panel2 = new Panel();
+            redOutput = new RichTextBox();
             label5 = new Label();
             label4 = new Label();
             dtpEnd = new DateTimePicker();
             dtpStart = new DateTimePicker();
             btnSearchNodes = new Button();
-            redOutput = new RichTextBox();
             label3 = new Label();
             label2 = new Label();
             lblNodeName = new Label();
@@ -54,7 +54,7 @@
             panel1.BackColor = SystemColors.Control;
             panel1.Location = new Point(12, 85);
             panel1.Name = "panel1";
-            panel1.Size = new Size(593, 543);
+            panel1.Size = new Size(519, 543);
             panel1.TabIndex = 0;
             // 
             // panel2
@@ -70,10 +70,18 @@
             panel2.Controls.Add(label2);
             panel2.Controls.Add(lblNodeName);
             panel2.Controls.Add(lblNodeandEdge);
-            panel2.Location = new Point(611, 12);
+            panel2.Location = new Point(537, 12);
             panel2.Name = "panel2";
-            panel2.Size = new Size(562, 323);
+            panel2.Size = new Size(596, 323);
             panel2.TabIndex = 1;
+            // 
+            // redOutput
+            // 
+            redOutput.Location = new Point(287, 11);
+            redOutput.Name = "redOutput";
+            redOutput.Size = new Size(295, 295);
+            redOutput.TabIndex = 5;
+            redOutput.Text = "";
             // 
             // label5
             // 
@@ -116,14 +124,6 @@
             btnSearchNodes.Text = "Search";
             btnSearchNodes.UseVisualStyleBackColor = true;
             btnSearchNodes.Click += btnSearchNodes_Click;
-            // 
-            // redOutput
-            // 
-            redOutput.Location = new Point(283, 14);
-            redOutput.Name = "redOutput";
-            redOutput.Size = new Size(264, 295);
-            redOutput.TabIndex = 5;
-            redOutput.Text = "";
             // 
             // label3
             // 
@@ -170,7 +170,7 @@
             panel3.Controls.Add(label1);
             panel3.Location = new Point(12, 12);
             panel3.Name = "panel3";
-            panel3.Size = new Size(593, 67);
+            panel3.Size = new Size(519, 67);
             panel3.TabIndex = 2;
             // 
             // label1
@@ -185,9 +185,9 @@
             // 
             // btnHome
             // 
-            btnHome.Location = new Point(611, 570);
+            btnHome.Location = new Point(537, 570);
             btnHome.Name = "btnHome";
-            btnHome.Size = new Size(562, 58);
+            btnHome.Size = new Size(596, 58);
             btnHome.TabIndex = 3;
             btnHome.Text = "Go Back Home";
             btnHome.UseVisualStyleBackColor = true;
@@ -196,16 +196,16 @@
             // dataGridView1
             // 
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(611, 341);
+            dataGridView1.Location = new Point(537, 341);
             dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(562, 223);
+            dataGridView1.Size = new Size(596, 223);
             dataGridView1.TabIndex = 4;
             // 
             // frmNetworkTopology
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1185, 640);
+            ClientSize = new Size(1144, 640);
             Controls.Add(dataGridView1);
             Controls.Add(btnHome);
             Controls.Add(panel2);
