@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Smart_X.Api.DataModels;
 using Smart_X.Api.Services;
+using SystemFrontEnd.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-//sensor manager
+//sensor manager and network analysis engine
 builder.Services.AddSingleton<RealTimeSensorManager>();
+builder.Services.AddSingleton<NetworkAnalysisEngine>();
 
 //background sim worker
 builder.Services.AddHostedService<SensorSimulatorService>();
@@ -18,13 +19,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 //reg data service
 builder.Services.AddScoped<IDataService, DataService>();
 
-
-
-
-
-
 var app = builder.Build();
-
 
 //create database on startup if not there
 using (var scope = app.Services.CreateScope())
@@ -39,7 +34,6 @@ var api = app.MapGroup("/api/data");
 
 //-----------------------------------------------------------------------------
 //sensor details
-//POST /api/sensors 
 var sensorApi = app.MapGroup("/api/sensors");
 
 sensorApi.MapPost("/", async (CreateSensorDetailsRequest request, IDataService dataService, CancellationToken ct) =>
@@ -51,7 +45,6 @@ sensorApi.MapPost("/", async (CreateSensorDetailsRequest request, IDataService d
     return Results.Created($"/api/sensors/{result.Id}", result);
 });
 
-//GET /api/sensors
 sensorApi.MapGet("/", async (IDataService dataService, CancellationToken ct) =>
 {
     var sensors = await dataService.GetAllSensorDetailsAsync(ct);
@@ -59,9 +52,7 @@ sensorApi.MapGet("/", async (IDataService dataService, CancellationToken ct) =>
 });
 
 //-----------------------------------------------------------------------------
-
 //sensor data
-// POST /api/data form pushes data here
 api.MapPost("/", async (CreateSensorDataRequest request, IDataService dataService, CancellationToken ct) =>
 {
     if (string.IsNullOrWhiteSpace(request.SensorMAC))
@@ -73,24 +64,62 @@ api.MapPost("/", async (CreateSensorDataRequest request, IDataService dataServic
     return Results.Created($"/api/data/{result.Id}", result);
 });
 
-
-//GET /api/data form retrieves data from this
 api.MapGet("/", async (IDataService dataService, CancellationToken ct) =>
 {
     var data = await dataService.GetAllDataAsync(ct);
     return Results.Ok(data);
 });
 
+//BST Historical Range Query Endpoint
+api.MapGet("/range", async (string sensorMac, DateTime start, DateTime end, IDataService dataService, CancellationToken ct) =>
+{
+    var allData = await dataService.GetAllDataAsync(ct);
+
+    var bst = new SensorHistoryBst();
+    foreach (var resp in allData.Where(d => d.SensorMAC.Equals(sensorMac, StringComparison.OrdinalIgnoreCase)))
+    {
+        var record = new SensorDataRecord
+        {
+            Id = resp.Id,
+            SensorMAC = resp.SensorMAC,
+            SensorValue = resp.SensorValue,
+            TimeStamp = resp.TimeStamp
+        };
+
+
+        bst.Insert(record);
+    }
+
+    var rangeResults = bst.RangeQuery(start, end);
+    return Results.Ok(rangeResults);
+});
+
+//-----------------------------------------------------------------------------
+//topology analysis endpoints
+var topologyApi = app.MapGroup("/api/topology");
+
+topologyApi.MapGet("/dfs/{startNode}", (string startNode, NetworkAnalysisEngine engine) =>
+{
+    var connectedDevices = engine.GetConnectedDevicesDfs(startNode);
+    return Results.Ok(connectedDevices);
+});
+
+topologyApi.MapGet("/mst/path", (string startNode, string targetNode, NetworkAnalysisEngine engine) =>
+{
+    var mstParent = engine.ComputePrimsMst(startNode);
+    var path = engine.GetHopPathToGateway(mstParent, targetNode);
+    return Results.Ok(new { Path = path, TotalHops = path.Count - 1 });
+});
+
 //-----------------------------------------------------------------------------
 var attachmentApi = app.MapGroup("/api/attachments");
 
-//upload files / attachemtns
 attachmentApi.MapPost("/upload", async (HttpContext context, IDataService dataService, CancellationToken ct) =>
 {
     var form = await context.Request.ReadFormAsync(ct);
     var file = form.Files.GetFile("file");
     var sensorMAC = form["sensorMAC"].ToString();
-    var fileType = form["fileType"].ToString(); 
+    var fileType = form["fileType"].ToString();
 
     if (file == null || file.Length == 0 || string.IsNullOrWhiteSpace(sensorMAC))
     {
@@ -101,14 +130,12 @@ attachmentApi.MapPost("/upload", async (HttpContext context, IDataService dataSe
     return Results.Created($"/api/attachments/{result.Id}", result);
 }).DisableAntiforgery();
 
-//get file meta data
 attachmentApi.MapGet("/sensor/{sensorMAC}", async (string sensorMAC, IDataService dataService, CancellationToken ct) =>
 {
     var attachments = await dataService.GetAttachmentsByMacAsync(sensorMAC, ct);
     return Results.Ok(attachments);
 });
 
-//view by id
 attachmentApi.MapGet("/download/{id:guid}", async (Guid id, IDataService dataService, CancellationToken ct) =>
 {
     var fileResult = await dataService.GetFileByIdAsync(id, ct);
@@ -116,11 +143,6 @@ attachmentApi.MapGet("/download/{id:guid}", async (Guid id, IDataService dataSer
 
     return Results.File(fileResult.Value.Data, fileResult.Value.ContentType, fileResult.Value.FileName);
 });
-
-
-//-----------------------------------------------------------------------------
-
-//manual override endpoints
 
 //run the application
 app.Run();

@@ -55,7 +55,10 @@ public partial class frmNetworkTopology : Form
             ("Node B", "Node D"),
             ("Node B", "Node E"),
             ("Node C", "Node E"),
-            ("Node D", "Node E")
+            ("Node D", "Node E"),
+            ("Node D", "Node F"),
+            ("Node E", "Node F"),
+            ("Node F", "Gateway Router")
         };
 
         // remove arrows on bi connections 
@@ -71,13 +74,13 @@ public partial class frmNetworkTopology : Form
         foreach (Node node in graph.Nodes)
         {
             node.Attr.Shape = Shape.Circle;
-            node.Attr.FillColor = Microsoft.Msagl.Drawing.Color.LightBlue;
+            node.Attr.FillColor = Microsoft.Msagl.Drawing.Color.LightCoral;
             node.Attr.LineWidth = 2;
-            node.Label.FontSize = 12;
+            node.Label.FontSize = 8;
         }
 
         // style gateway node
-        Node gateway = graph.FindNode("Gateway router");
+        Node gateway = graph.FindNode("Gateway Router");
 
         if (gateway != null)
         {
@@ -92,6 +95,30 @@ public partial class frmNetworkTopology : Form
         _viewer.Dock = DockStyle.Fill;
 
 
+        // node selection event handling
+        _viewer.Click -= Viewer_Click;
+        _viewer.Click += Viewer_Click;
+
     }
 
+    //view click event handeler
+    private void Viewer_Click(Object sender, EventArgs e)
+    {
+        if (_viewer.SelectedObject is Microsoft.Msagl.Drawing.Node selectedNode)
+        {
+            string nodeId = selectedNode.Id;
+
+            MessageBox.Show($"You clicked on node: {nodeId}");
+        }
+    }
+
+    private void label1_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void label3_Click(object sender, EventArgs e)
+    {
+
+    }
 }
