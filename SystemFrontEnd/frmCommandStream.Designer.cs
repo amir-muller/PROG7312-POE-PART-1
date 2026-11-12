@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            btnGoHome = new Button();
             panel1 = new Panel();
             btnTriggerPump = new Button();
             lblStatus = new Label();
@@ -46,22 +45,12 @@
             dgvDevices = new DataGridView();
             dgvTelemetry = new DataGridView();
             RefreshTimer = new System.Windows.Forms.Timer(components);
+            btnGoHome = new Button();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvDevices).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvTelemetry).BeginInit();
             SuspendLayout();
-            // 
-            // btnGoHome
-            // 
-            btnGoHome.BackColor = SystemColors.ControlLight;
-            btnGoHome.Location = new Point(620, 558);
-            btnGoHome.Name = "btnGoHome";
-            btnGoHome.Size = new Size(485, 49);
-            btnGoHome.TabIndex = 0;
-            btnGoHome.Text = "Go Home";
-            btnGoHome.UseVisualStyleBackColor = false;
-            btnGoHome.Click += btnGoHome_Click;
             // 
             // panel1
             // 
@@ -195,6 +184,17 @@
             dgvTelemetry.Name = "dgvTelemetry";
             dgvTelemetry.Size = new Size(485, 540);
             dgvTelemetry.TabIndex = 5;
+            // 
+            // btnGoHome
+            // 
+            btnGoHome.BackColor = SystemColors.ControlLight;
+            btnGoHome.Location = new Point(620, 558);
+            btnGoHome.Name = "btnGoHome";
+            btnGoHome.Size = new Size(485, 49);
+            btnGoHome.TabIndex = 0;
+            btnGoHome.Text = "Go Home";
+            btnGoHome.UseVisualStyleBackColor = false;
+            btnGoHome.Click += btnGoHome_Click;
             // 
             // frmCommandStream
             // 

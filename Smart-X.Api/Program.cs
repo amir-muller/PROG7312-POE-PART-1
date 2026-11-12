@@ -71,8 +71,13 @@ api.MapGet("/", async (IDataService dataService, CancellationToken ct) =>
 });
 
 //BST Historical Range Query Endpoint
-api.MapGet("/range", async (string sensorMac, DateTime start, DateTime end, IDataService dataService, CancellationToken ct) =>
+api.MapGet("/range", async (string sensorMac, string start, string end, IDataService dataService, CancellationToken ct) =>
 {
+    if (!DateTime.TryParse(start, out var parsedStart) || !DateTime.TryParse(end, out var parsedEnd))
+    {
+        return Results.BadRequest("Invalid date range format.");
+    }
+
     var allData = await dataService.GetAllDataAsync(ct);
 
     var bst = new SensorHistoryBst();
@@ -86,11 +91,10 @@ api.MapGet("/range", async (string sensorMac, DateTime start, DateTime end, IDat
             TimeStamp = resp.TimeStamp
         };
 
-
         bst.Insert(record);
     }
 
-    var rangeResults = bst.RangeQuery(start, end);
+    var rangeResults = bst.RangeQuery(parsedStart, parsedEnd);
     return Results.Ok(rangeResults);
 });
 

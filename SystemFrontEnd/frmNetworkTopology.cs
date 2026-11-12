@@ -24,6 +24,9 @@ public partial class frmNetworkTopology : Form
     private ApiClient _apiClient = new ApiClient();
     private List<SensorDetailsResponse> _activeSensors = new();
 
+    // selected sensor
+    private string _selectedSensorMac = string.Empty;
+
 
     public frmNetworkTopology()
     {
@@ -39,8 +42,8 @@ public partial class frmNetworkTopology : Form
         {
             _activeSensors = sensors;
             foreach (var s in sensors)
-            {
-                _sensorDetailsMap[s.SensorMAC] = s;
+            {                
+                _sensorDetailsMap[s.SensorName] = s;
             }
         }
 
@@ -112,45 +115,26 @@ public partial class frmNetworkTopology : Form
 
             if (_sensorDetailsMap.TryGetValue(nodeId, out var details))
             {
+                _selectedSensorMac = details.SensorMAC;
+
                 label2.Text = $"Node Mac: {details.SensorMAC}";
                 label3.Text = $"Node Type: {details.SensorCategory} ({details.SensorLocation})";
-
-                //Query Historical Data
-                var historicalData = await _apiClient.GetHistoricalRangeAsync(
-                    details.SensorMAC,
-                    DateTime.UtcNow.AddDays(-7),
-                    DateTime.UtcNow
-                );
-
-                int recordCount = historicalData?.Count ?? 0;
-
-                //Route Graph Traversal
-                var subnetDevices = await _apiClient.GetSubnetDevicesDfsAsync("Gateway Router");
-                int subnetCount = subnetDevices?.Count ?? 0;
-
-                //Route Minimum Spanning Tree
-                var mstResult = await _apiClient.GetMstHopPathAsync("Gateway Router", nodeId);
-                string hopPathString = mstResult != null && mstResult.Path != null
-                    ? string.Join(" -> ", mstResult.Path)
-                    : nodeId;
-
-
-                redOutput.Text = $"Selected Sensor: {nodeId}\n" +
-                                $"MAC: {details.SensorMAC}\n\n" +
-                                $"Historical Records (BST Range Query): {recordCount}\n" +
-                                $"Subnet Connected Count (DFS): {subnetCount}\n" +
-                                $"Power-Efficient MST Hop Path: {hopPathString}" +
-                                "Dynamic Network Topology Analysis";
 
             }
             else
             {
-                label2.Text = "Node Mac: N/A (Gateway)";
-                label3.Text = "Node Type: Network Core Router";
-                
+                _selectedSensorMac = string.Empty;
+                label2.Text = "Node Mac: ";
+                label3.Text = "Node Type: ";
+
             }
         }
     }
+
+
+
+
+
 
 
 
@@ -159,4 +143,80 @@ public partial class frmNetworkTopology : Form
 
     private void label3_Click(object sender, EventArgs e) { }
 
+    private void btnHome_Click(object sender, EventArgs e)
+    {
+        //hide
+        this.Hide();
+
+        //open menu form
+        Form1 menu = new Form1();
+        menu.Show();
+    }
+
+    private async void btnSearchNodes_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(_selectedSensorMac))
+        {
+            MessageBox.Show("Please select a sensor node first before searching");
+            return;
+        }
+
+        DateTime startDate = dtpStart.Value;
+        DateTime endDate = dtpEnd.Value.Date.AddDays(1).AddSeconds(-1);
+
+        //calling the api endpoint
+        var historicalData = await _apiClient.GetHistoricalRangeAsync(
+            _selectedSensorMac,
+            startDate,
+            endDate
+        );
+
+        int count = historicalData?.Count ?? 0;
+
+        double averageValue = (historicalData != null && historicalData.Any())
+        ? historicalData.Average(d => d.SensorValue)
+        : 0;
+
+        redOutput.Text = $"Date Range Query Results:\n\n" +
+                    $"From: {startDate:yyyy-MM-dd} To: {endDate:yyyy-MM-dd}\n" +
+                    $"Total Records Found: {count}\n" +
+                    $"Average Sensor Value: {averageValue:F2}";
+                    
+
+
+
+        //    //Query Historical Data
+        //    var historicalData = await _apiClient.GetHistoricalRangeAsync(
+        //        details.SensorMAC,
+        //        DateTime.UtcNow.AddDays(-7),
+        //        DateTime.UtcNow
+        //    );
+
+        //    int recordCount = historicalData?.Count ?? 0;
+
+        //    //Route Graph Traversal
+        //    var subnetDevices = await _apiClient.GetSubnetDevicesDfsAsync("Gateway Router");
+        //    int subnetCount = subnetDevices?.Count ?? 0;
+
+        //    //Route Minimum Spanning Tree
+        //    var mstResult = await _apiClient.GetMstHopPathAsync("Gateway Router", nodeId);
+        //    string hopPathString = mstResult != null && mstResult.Path != null
+        //        ? string.Join(" -> ", mstResult.Path)
+        //        : nodeId;
+
+
+        //    redOutput.Text = $"Selected Sensor: {nodeId}\n" +
+        //                    $"MAC: {details.SensorMAC}\n\n" +
+        //                    $"Historical Records (BST Range Query): {recordCount}\n" +
+        //                    $"Subnet Connected Count (DFS): {subnetCount}\n" +
+        //                    $"Power-Efficient MST Hop Path: {hopPathString}" +
+        //                    "Dynamic Network Topology Analysis";
+
+        //}
+        //else
+        //{
+        //    label2.Text = "Node Mac: N/A (Gateway)";
+        //    label3.Text = "Node Type: Network Core Router";
+        //}
+    }
 }

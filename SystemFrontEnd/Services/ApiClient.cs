@@ -119,11 +119,11 @@ public class ApiClient
     }
 
 
-    //add part 3 api endpoints
+    //add part api endpoints
     public async Task<List<SensorDataResponse>?> GetHistoricalRangeAsync(string sensorMac, DateTime start, DateTime end)
     {
-        string startStr = start.ToString("o");
-        string endStr = end.ToString("o");
+        string startStr = start.ToString("yyyy-MM-ddTHH:mm:ss");
+        string endStr = end.ToString("yyyy-MM-ddTHH:mm:ss");
         return await _httpClient.GetFromJsonAsync<List<SensorDataResponse>>($"api/data/range?sensorMac={sensorMac}&start={startStr}&end={endStr}");
     }
 
