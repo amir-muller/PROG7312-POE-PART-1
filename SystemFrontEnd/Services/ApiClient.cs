@@ -138,4 +138,11 @@ public class ApiClient
     }
 
     public record MstPathResponse(List<string> Path, int TotalHops);
+
+    public async Task<List<TopologyEdgeResponse>?> GetAllEdgesAsync()
+    {
+        return await _httpClient.GetFromJsonAsync<List<TopologyEdgeResponse>>("api/topology/edges");
+    }
+
+    public record TopologyEdgeResponse(string Source, string Target, double Weight);
 }

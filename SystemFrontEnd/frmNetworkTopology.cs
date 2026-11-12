@@ -47,13 +47,13 @@ public partial class frmNetworkTopology : Form
             }
         }
 
-        InitializeGraph();
+        await InitializeGraphAsync();
     }
 
 
 
     // initialize graph method
-    public void InitializeGraph()
+    public async Task InitializeGraphAsync()
     {
         // create Gviewer
         _viewer = new GViewer
@@ -62,20 +62,17 @@ public partial class frmNetworkTopology : Form
             ToolBarIsVisible = false // hide toolbar
         };
 
-
         // create graph
         Graph graph = new Graph("Topology Graph");
         graph.LayoutAlgorithmSettings = new MdsLayoutSettings();
-
-
-        //add gateway node
+  
         Microsoft.Msagl.Drawing.Node gatewayNode = graph.AddNode("Gateway Router");
         gatewayNode.Attr.Shape = Shape.Circle;
         gatewayNode.Attr.FillColor = Microsoft.Msagl.Drawing.Color.LightGreen;
         gatewayNode.Attr.LineWidth = 2;
         gatewayNode.Label.FontSize = 8;
 
-        //creating nodes and edges
+        //creating sensor nodes
         foreach (var sensor in _activeSensors)
         {
             string nodeName = sensor.SensorName;
@@ -85,13 +82,34 @@ public partial class frmNetworkTopology : Form
             node.Attr.FillColor = Microsoft.Msagl.Drawing.Color.LightCoral;
             node.Attr.LineWidth = 2;
             node.Label.FontSize = 8;
-
-            //link senosr to gateway
-            Microsoft.Msagl.Drawing.Edge edge = graph.AddEdge("Gateway Router", nodeName);
-            edge.Attr.ArrowheadAtTarget = ArrowStyle.None;
-            edge.Attr.ArrowheadAtSource = ArrowStyle.None;
         }
 
+        // fetch edges
+        var edges = await _apiClient.GetAllEdgesAsync();
+
+        if (edges != null && edges.Count > 0)
+        {
+            foreach (var e in edges)
+            {
+                // check that both nodes exicts.
+                if (graph.FindNode(e.Source) != null && graph.FindNode(e.Target) != null)
+                {
+                    Microsoft.Msagl.Drawing.Edge edge = graph.AddEdge(e.Source, e.Target);
+                    edge.Attr.ArrowheadAtTarget = ArrowStyle.None;
+                    edge.Attr.ArrowheadAtSource = ArrowStyle.None;
+                }
+            }
+        }
+        else
+        {
+            //defaults to gateway router
+            foreach (var sensor in _activeSensors)
+            {
+                Microsoft.Msagl.Drawing.Edge edge = graph.AddEdge("Gateway Router", sensor.SensorName);
+                edge.Attr.ArrowheadAtTarget = ArrowStyle.None;
+                edge.Attr.ArrowheadAtSource = ArrowStyle.None;
+            }
+        }
 
         _viewer.Graph = graph;
         panel1.Controls.Clear();
@@ -100,7 +118,6 @@ public partial class frmNetworkTopology : Form
 
         _viewer.Click -= Viewer_Click;
         _viewer.Click += Viewer_Click;
-
     }
 
 
@@ -131,13 +148,6 @@ public partial class frmNetworkTopology : Form
         }
     }
 
-
-
-
-
-
-
-
     private void label1_Click(object sender, EventArgs e) { }
 
 
@@ -164,8 +174,10 @@ public partial class frmNetworkTopology : Form
         var currentSensor = _activeSensors.FirstOrDefault(s => s.SensorMAC.Equals(_selectedSensorMac, StringComparison.OrdinalIgnoreCase));
         string nodeName = currentSensor?.SensorName ?? "Gateway Router";
 
-        DateTime startDate = dtpStart.Value;
-        DateTime endDate = dtpEnd.Value.Date.AddDays(1).AddSeconds(-1);
+
+        // integrate date time clicker
+        DateTime startDate = DateTime.UtcNow.AddDays(-7);
+        DateTime endDate = DateTime.UtcNow;
 
         try
         {
@@ -208,42 +220,6 @@ public partial class frmNetworkTopology : Form
         }
     }
         
-                    
-
-
-
-        //    //Query Historical Data
-        //    var historicalData = await _apiClient.GetHistoricalRangeAsync(
-        //        details.SensorMAC,
-        //        DateTime.UtcNow.AddDays(-7),
-        //        DateTime.UtcNow
-        //    );
-
-        //    int recordCount = historicalData?.Count ?? 0;
-
-        //    //Route Graph Traversal
-        //    var subnetDevices = await _apiClient.GetSubnetDevicesDfsAsync("Gateway Router");
-        //    int subnetCount = subnetDevices?.Count ?? 0;
-
-        //    //Route Minimum Spanning Tree
-        //    var mstResult = await _apiClient.GetMstHopPathAsync("Gateway Router", nodeId);
-        //    string hopPathString = mstResult != null && mstResult.Path != null
-        //        ? string.Join(" -> ", mstResult.Path)
-        //        : nodeId;
-
-
-        //    redOutput.Text = $"Selected Sensor: {nodeId}\n" +
-        //                    $"MAC: {details.SensorMAC}\n\n" +
-        //                    $"Historical Records (BST Range Query): {recordCount}\n" +
-        //                    $"Subnet Connected Count (DFS): {subnetCount}\n" +
-        //                    $"Power-Efficient MST Hop Path: {hopPathString}" +
-        //                    "Dynamic Network Topology Analysis";
-
-        //}
-        //else
-        //{
-        //    label2.Text = "Node Mac: N/A (Gateway)";
-        //    label3.Text = "Node Type: Network Core Router";
-        //}
-    }
+                   
+}
 

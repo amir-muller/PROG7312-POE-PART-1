@@ -28,16 +28,20 @@ using (var scope = app.Services.CreateScope())
     db.Database.EnsureDeletedAsync().Wait();
     db.Database.EnsureCreated();
 
-    // Populate NetworkAnalysisEngine with initial sensors from DB
     var dataService = scope.ServiceProvider.GetRequiredService<IDataService>();
     var engine = scope.ServiceProvider.GetRequiredService<NetworkAnalysisEngine>();
 
     var existingSensors = dataService.GetAllSensorDetailsAsync().Result;
     if (existingSensors != null && existingSensors.Any())
     {
-        engine.BuildDynamicTopology(existingSensors);
+        // rebuild for each sensor
+        foreach (var sensor in existingSensors)
+        {
+            engine.ConnectNewNodeWithNearestNeighbors(sensor, existingSensors);
+        }
     }
 }
+
 
 //defining api endpoints
 var api = app.MapGroup("/api/data");
@@ -134,6 +138,13 @@ topologyApi.MapGet("/mst/path", (string startNode, string targetNode, NetworkAna
     var mstParent = engine.ComputePrimsMst(startNode);
     var path = engine.GetHopPathToGateway(mstParent, targetNode);
     return Results.Ok(new { Path = path, TotalHops = path.Count - 1 });
+});
+
+topologyApi.MapGet("/edges", (NetworkAnalysisEngine engine) =>
+{
+    // Exposes the engine's adjacency list to the frontend
+    var edges = engine.GetAllEdges();
+    return Results.Ok(edges);
 });
 
 //-----------------------------------------------------------------------------

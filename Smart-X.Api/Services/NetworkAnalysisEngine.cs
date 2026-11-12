@@ -226,29 +226,49 @@ public class NetworkAnalysisEngine
             _adjacencyList[newNodeName] = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
         }
 
-        //add default gateway connection to node
-        AddEdge("Gateway Router", newNodeName, 2.0);
+        //gateway router always as root
+        EnsureGateWayExists();
 
-        //calc distance
+        //calc to all other sensors
         var distances = new List<(string NodeName, double Distance)>();
 
         foreach (var other in allSensors)
         {
-            if (other.SensorMAC.Equals(newSensor.SensorMAC, StringComparison.OrdinalIgnoreCase))
-                continue; // Skip self
+            //prevent it to check against it self
+            if (other.SensorMAC.Equals(newSensor.SensorMAC, StringComparison.OrdinalIgnoreCase) ||
+                other.SensorName.Equals(newNodeName, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            //ensure other nodes also exists
+            if (!_adjacencyList.ContainsKey(other.SensorName))
+            {
+                _adjacencyList[other.SensorName] = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+            }
 
             double distance = CalculateProximityMetric(newSensor, other);
             distances.Add((other.SensorName, distance));
         }
 
+        // falback to defautls with gateway router
+        if (distances.Count == 0)
+        {
+            AddEdge("Gateway Router", newNodeName, 1.5);
+            return;
+        }
 
-        // select closest 3 nodes,
+        //sort by dist
         var closestNeighbors = distances.OrderBy(d => d.Distance).Take(3);
 
         foreach (var neighbor in closestNeighbors)
         {
-            //Add undirected edge with weight proportional to distance
+            //undirected edge
             AddEdge(newNodeName, neighbor.NodeName, Math.Round(neighbor.Distance, 2));
+        }
+
+        // check that it conencts to the Gateway router
+        if (!_adjacencyList["Gateway Router"].ContainsKey(newNodeName))
+        {
+            AddEdge("Gateway Router", newNodeName, 2.5);
         }
 
     }
@@ -256,17 +276,44 @@ public class NetworkAnalysisEngine
 
     private double CalculateProximityMetric(SensorDetailsResponse a, SensorDetailsResponse b)
     {
+        string locA = a.SensorLocation?.Trim() ?? string.Empty;
+        string locB = b.SensorLocation?.Trim() ?? string.Empty;
+
         // if in same location smal proximity
         if (a.SensorLocation.Equals(b.SensorLocation, StringComparison.OrdinalIgnoreCase))
         {
             return 1.0;
         }
 
-        // Otherwise, calc distance based on mac hash
+        // calc distance based on mac hash
         int hashA = Math.Abs(a.SensorMAC.GetHashCode());
         int hashB = Math.Abs(b.SensorMAC.GetHashCode());
 
         return Math.Abs(hashA % 50 - hashB % 50) + 2.0;
+    }
+
+    public List<(string Source, string Target, double Weight)> GetAllEdges()
+    {
+        var edgeList = new List<(string Source, string Target, double Weight)>();
+        var addedPairs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var kvp in _adjacencyList)
+        {
+            string u = kvp.Key;
+            foreach (var neighbor in kvp.Value)
+            {
+                string v = neighbor.Key;
+                double weight = neighbor.Value;
+
+                // Prevent duplicate undirected edges
+                string pairKey = string.Compare(u, v, StringComparison.OrdinalIgnoreCase) < 0 ? $"{u}-{v}" : $"{v}-{u}";
+                if (addedPairs.Add(pairKey))
+                {
+                    edgeList.Add((u, v, weight));
+                }
+            }
+        }
+        return edgeList;
     }
 
 
