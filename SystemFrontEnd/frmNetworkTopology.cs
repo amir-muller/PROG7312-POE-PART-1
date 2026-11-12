@@ -1,4 +1,5 @@
-﻿using Microsoft.Msagl.Drawing;
+﻿using Microsoft.Msagl.Core.Layout;
+using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
 using Microsoft.Msagl.Layout.MDS;
 using System;
@@ -10,22 +11,45 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SystemFrontEnd.Services;
+
 
 namespace SystemFrontEnd;
 
 public partial class frmNetworkTopology : Form
 {
-    // graph object
+    // Global variables
     private GViewer _viewer;
+    private Dictionary<string, SensorDetailsResponse> _sensorDetailsMap = new(StringComparer.OrdinalIgnoreCase);
+    private ApiClient _apiClient = new ApiClient();
+    private List<SensorDetailsResponse> _activeSensors = new();
 
 
     public frmNetworkTopology()
     {
         InitializeComponent();
+        _ = InitializeTopologyDataAsync();
+    }
+
+    public async Task InitializeTopologyDataAsync()
+    {
+        var sensors = await _apiClient.GetAllSensorDetailsAsync();
+
+        if (sensors != null)
+        {
+            _activeSensors = sensors;
+            foreach (var s in sensors)
+            {
+                _sensorDetailsMap[s.SensorMAC] = s;
+            }
+        }
+
         InitializeGraph();
     }
 
-    // initialize graph
+
+
+    // initialize graph method
     public void InitializeGraph()
     {
         // create Gviewer
@@ -38,87 +62,101 @@ public partial class frmNetworkTopology : Form
 
         // create graph
         Graph graph = new Graph("Topology Graph");
-
-
         graph.LayoutAlgorithmSettings = new MdsLayoutSettings();
 
 
-        // add nodes
-        var connections = new (string Source, string Target)[]
-        {
-            ("Gateway Router", "Node A"),
-            ("Gateway Router", "Node B"),
-            ("Gateway Router", "Node C"),
-            ("Node A", "Node B"),
-            ("Node A", "Node D"),
-            ("Node B", "Node C"),
-            ("Node B", "Node D"),
-            ("Node B", "Node E"),
-            ("Node C", "Node E"),
-            ("Node D", "Node E"),
-            ("Node D", "Node F"),
-            ("Node E", "Node F"),
-            ("Node F", "Gateway Router")
-        };
+        //add gateway node
+        Microsoft.Msagl.Drawing.Node gatewayNode = graph.AddNode("Gateway Router");
+        gatewayNode.Attr.Shape = Shape.Circle;
+        gatewayNode.Attr.FillColor = Microsoft.Msagl.Drawing.Color.LightGreen;
+        gatewayNode.Attr.LineWidth = 2;
+        gatewayNode.Label.FontSize = 8;
 
-        // remove arrows on bi connections 
-        foreach (var (source, target) in connections)
+        //creating nodes and edges
+        foreach (var sensor in _activeSensors)
         {
-            Edge edge = graph.AddEdge(source, target);
+            string nodeName = sensor.SensorName;
 
-            edge.Attr.ArrowheadAtTarget = ArrowStyle.None;
-            edge.Attr.ArrowheadAtSource = ArrowStyle.None;
-        }
-
-        //style nodes
-        foreach (Node node in graph.Nodes)
-        {
+            Microsoft.Msagl.Drawing.Node node = graph.AddNode(nodeName);
             node.Attr.Shape = Shape.Circle;
             node.Attr.FillColor = Microsoft.Msagl.Drawing.Color.LightCoral;
             node.Attr.LineWidth = 2;
             node.Label.FontSize = 8;
-        }
 
-        // style gateway node
-        Node gateway = graph.FindNode("Gateway Router");
-
-        if (gateway != null)
-        {
-            gateway.Attr.FillColor = Microsoft.Msagl.Drawing.Color.LightGreen;
+            //link senosr to gateway
+            Microsoft.Msagl.Drawing.Edge edge = graph.AddEdge("Gateway Router", nodeName);
+            edge.Attr.ArrowheadAtTarget = ArrowStyle.None;
+            edge.Attr.ArrowheadAtSource = ArrowStyle.None;
         }
 
 
-        // set to viewer
         _viewer.Graph = graph;
         panel1.Controls.Clear();
         panel1.Controls.Add(_viewer);
         _viewer.Dock = DockStyle.Fill;
 
-
-        // node selection event handling
         _viewer.Click -= Viewer_Click;
         _viewer.Click += Viewer_Click;
 
     }
 
+
     //view click event handeler
-    private void Viewer_Click(Object sender, EventArgs e)
+    private async void Viewer_Click(Object sender, EventArgs e)
     {
         if (_viewer.SelectedObject is Microsoft.Msagl.Drawing.Node selectedNode)
         {
             string nodeId = selectedNode.Id;
 
-            MessageBox.Show($"You clicked on node: {nodeId}");
+            lblNodeName.Text = $"Node Name: {nodeId}";
+
+            if (_sensorDetailsMap.TryGetValue(nodeId, out var details))
+            {
+                label2.Text = $"Node Mac: {details.SensorMAC}";
+                label3.Text = $"Node Type: {details.SensorCategory} ({details.SensorLocation})";
+
+                //Query Historical Data
+                var historicalData = await _apiClient.GetHistoricalRangeAsync(
+                    details.SensorMAC,
+                    DateTime.UtcNow.AddDays(-7),
+                    DateTime.UtcNow
+                );
+
+                int recordCount = historicalData?.Count ?? 0;
+
+                //Route Graph Traversal
+                var subnetDevices = await _apiClient.GetSubnetDevicesDfsAsync("Gateway Router");
+                int subnetCount = subnetDevices?.Count ?? 0;
+
+                //Route Minimum Spanning Tree
+                var mstResult = await _apiClient.GetMstHopPathAsync("Gateway Router", nodeId);
+                string hopPathString = mstResult != null && mstResult.Path != null
+                    ? string.Join(" -> ", mstResult.Path)
+                    : nodeId;
+
+
+                redOutput.Text = $"Selected Sensor: {nodeId}\n" +
+                                $"MAC: {details.SensorMAC}\n\n" +
+                                $"Historical Records (BST Range Query): {recordCount}\n" +
+                                $"Subnet Connected Count (DFS): {subnetCount}\n" +
+                                $"Power-Efficient MST Hop Path: {hopPathString}" +
+                                "Dynamic Network Topology Analysis";
+
+            }
+            else
+            {
+                label2.Text = "Node Mac: N/A (Gateway)";
+                label3.Text = "Node Type: Network Core Router";
+                
+            }
         }
     }
 
-    private void label1_Click(object sender, EventArgs e)
-    {
 
-    }
 
-    private void label3_Click(object sender, EventArgs e)
-    {
+    private void label1_Click(object sender, EventArgs e) { }
 
-    }
+
+    private void label3_Click(object sender, EventArgs e) { }
+
 }

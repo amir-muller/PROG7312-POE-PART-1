@@ -117,4 +117,25 @@ public class ApiClient
         }
         return null;
     }
+
+
+    //add part 3 api endpoints
+    public async Task<List<SensorDataResponse>?> GetHistoricalRangeAsync(string sensorMac, DateTime start, DateTime end)
+    {
+        string startStr = start.ToString("o");
+        string endStr = end.ToString("o");
+        return await _httpClient.GetFromJsonAsync<List<SensorDataResponse>>($"api/data/range?sensorMac={sensorMac}&start={startStr}&end={endStr}");
+    }
+
+    public async Task<List<string>?> GetSubnetDevicesDfsAsync(string startNode)
+    {
+        return await _httpClient.GetFromJsonAsync<List<string>>($"api/topology/dfs/{startNode}");
+    }
+
+    public async Task<MstPathResponse?> GetMstHopPathAsync(string startNode, string targetNode)
+    {
+        return await _httpClient.GetFromJsonAsync<MstPathResponse>($"api/topology/mst/path?startNode={startNode}&targetNode={targetNode}");
+    }
+
+    public record MstPathResponse(List<string> Path, int TotalHops);
 }
