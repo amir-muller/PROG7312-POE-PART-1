@@ -67,21 +67,65 @@ public class NetworkAnalysisEngine
 
     public NetworkAnalysisEngine()
     {
-        // mesh network for testing rn
-        AddEdge("Gateway Router", "Node A", 1.2);
-        AddEdge("Gateway Router", "Node B", 2.5);
-        AddEdge("Gateway Router", "Node C", 1.8);
-        AddEdge("Node A", "Node B", 1.0);
-        AddEdge("Node A", "Node D", 3.1);
-        AddEdge("Node B", "Node C", 1.4);
-        AddEdge("Node B", "Node D", 2.0);
-        AddEdge("Node B", "Node E", 2.2);
-        AddEdge("Node C", "Node E", 1.5);
-        AddEdge("Node D", "Node E", 1.1);
-        AddEdge("Node D", "Node F", 2.8);
-        AddEdge("Node E", "Node F", 1.9);
-        AddEdge("Node F", "Gateway Router", 4.0);
+        //// mesh network for testing rn
+        //AddEdge("Gateway Router", "Node A", 1.2);
+        //AddEdge("Gateway Router", "Node B", 2.5);
+        //AddEdge("Gateway Router", "Node C", 1.8);
+        //AddEdge("Node A", "Node B", 1.0);
+        //AddEdge("Node A", "Node D", 3.1);
+        //AddEdge("Node B", "Node C", 1.4);
+        //AddEdge("Node B", "Node D", 2.0);
+        //AddEdge("Node B", "Node E", 2.2);
+        //AddEdge("Node C", "Node E", 1.5);
+        //AddEdge("Node D", "Node E", 1.1);
+        //AddEdge("Node D", "Node F", 2.8);
+        //AddEdge("Node E", "Node F", 1.9);
+        //AddEdge("Node F", "Gateway Router", 4.0);
+
+        EnsureGateWayExists();
     }
+
+    private void EnsureGateWayExists()
+    {
+        if (!_adjacencyList.ContainsKey("Gateway Router"))
+        {
+            _adjacencyList["Gateway Router"] = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+        }
+    }
+
+    public void BuildDynamicTopology(IEnumerable<SensorDetailsResponse> sensors)
+    {
+        _adjacencyList.Clear();
+        EnsureGateWayExists();
+
+        var sensorList = sensors.ToList();
+
+        foreach (var sensor in sensorList)
+        {
+            string nodeName = sensor.SensorName; // Matches graph node name
+
+            // Assign a simulated weight/distance
+            double weightToGateway = 1.5 + (Math.Abs(sensor.SensorMAC.GetHashCode()) % 20) / 10.0;
+            AddEdge("Gateway Router", nodeName, weightToGateway);
+        }
+
+        //creates the mesh
+        for (int i = 0; i < sensorList.Count; i++)
+        {
+            for (int j = i + 1; j < sensorList.Count; j++)
+            {
+                var nodeA = sensorList[i].SensorName;
+                var nodeB = sensorList[j].SensorName;
+
+                // if same location == strong connection / short distance
+                if (sensorList[i].SensorLocation.Equals(sensorList[j].SensorLocation, StringComparison.OrdinalIgnoreCase))
+                {
+                    AddEdge(nodeA, nodeB, 1.2);
+                }
+            }
+        }
+    }
+
 
     public void AddEdge(string u, string v, double weight)
     {
@@ -141,13 +185,17 @@ public class NetworkAnalysisEngine
             visited.Add(current);
             mstParent[current] = parent;
 
-            foreach (var neighbor in _adjacencyList[current])
+            if (_adjacencyList.ContainsKey(current))
             {
-                if (!visited.Contains(neighbor.Key))
+                foreach (var neighbor in _adjacencyList[current])
                 {
-                    minHeap.Enqueue((neighbor.Key, current, neighbor.Value), neighbor.Value);
+                    if (!visited.Contains(neighbor.Key))
+                    {
+                        minHeap.Enqueue((neighbor.Key, current, neighbor.Value), neighbor.Value);
+                    }
                 }
             }
+                
         }
 
         return mstParent;

@@ -161,26 +161,53 @@ public partial class frmNetworkTopology : Form
             return;
         }
 
+        var currentSensor = _activeSensors.FirstOrDefault(s => s.SensorMAC.Equals(_selectedSensorMac, StringComparison.OrdinalIgnoreCase));
+        string nodeName = currentSensor?.SensorName ?? "Gateway Router";
+
         DateTime startDate = dtpStart.Value;
         DateTime endDate = dtpEnd.Value.Date.AddDays(1).AddSeconds(-1);
 
-        //calling the api endpoint
-        var historicalData = await _apiClient.GetHistoricalRangeAsync(
-            _selectedSensorMac,
-            startDate,
-            endDate
-        );
+        try
+        {
+            //calling the api endpoint
+            var historicalData = await _apiClient.GetHistoricalRangeAsync(
+                _selectedSensorMac,
+                startDate,
+                endDate
+            );
 
-        int count = historicalData?.Count ?? 0;
+            // show results on the datagrid
+            dataGridView1.DataSource = historicalData;
 
-        double averageValue = (historicalData != null && historicalData.Any())
-        ? historicalData.Average(d => d.SensorValue)
-        : 0;
+            // get graph transversel for connected subnets
+            var subnetDevices = await _apiClient.GetSubnetDevicesDfsAsync("Gateway Router");
+            string subnetDevicesStr = subnetDevices != null ? string.Join(", ", subnetDevices) : "None";
 
-        redOutput.Text = $"Date Range Query Results:\n\n" +
-                    $"From: {startDate:yyyy-MM-dd} To: {endDate:yyyy-MM-dd}\n" +
-                    $"Total Records Found: {count}\n" +
-                    $"Average Sensor Value: {averageValue:F2}";
+            //pims algo mini spani treee
+            var mstResult = await _apiClient.GetMstHopPathAsync("Gateway Router", nodeName);
+            string pathStr = (mstResult != null && mstResult.Path != null)
+                ? string.Join(" => ", mstResult.Path)
+                : nodeName;
+
+            int totalHops = mstResult?.TotalHops ?? 0;
+
+
+            //display results summary
+            redOutput.Clear();
+            redOutput.Text = $"===Network Topology Analysis===\n" +
+                             $"Selected Node: {nodeName} with MAC {_selectedSensorMac}\n\n" +
+                             $"Graph Transversel\n" +
+                             $"{subnetDevicesStr}\n\n" +
+                             $"Minimum Spanning tree (MST)\n" +
+                             $"Path hoped: {pathStr} => Gateway Router\n" +
+                             $"Total Hops: {totalHops}\n";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to fetch network analysis: {ex.Message}", "API Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+        
                     
 
 
@@ -219,4 +246,4 @@ public partial class frmNetworkTopology : Form
         //    label3.Text = "Node Type: Network Core Router";
         //}
     }
-}
+

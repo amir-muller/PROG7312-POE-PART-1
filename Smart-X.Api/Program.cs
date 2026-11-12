@@ -27,6 +27,16 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.EnsureDeletedAsync().Wait();
     db.Database.EnsureCreated();
+
+    // Populate NetworkAnalysisEngine with initial sensors from DB
+    var dataService = scope.ServiceProvider.GetRequiredService<IDataService>();
+    var engine = scope.ServiceProvider.GetRequiredService<NetworkAnalysisEngine>();
+
+    var existingSensors = dataService.GetAllSensorDetailsAsync().Result;
+    if (existingSensors != null && existingSensors.Any())
+    {
+        engine.BuildDynamicTopology(existingSensors);
+    }
 }
 
 //defining api endpoints

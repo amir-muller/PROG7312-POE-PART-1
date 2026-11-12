@@ -43,8 +43,10 @@
             panel3 = new Panel();
             label1 = new Label();
             btnHome = new Button();
+            dataGridView1 = new DataGridView();
             panel2.SuspendLayout();
             panel3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
             // panel1
@@ -58,25 +60,25 @@
             // panel2
             // 
             panel2.BackColor = SystemColors.ScrollBar;
+            panel2.Controls.Add(redOutput);
             panel2.Controls.Add(label5);
             panel2.Controls.Add(label4);
             panel2.Controls.Add(dtpEnd);
             panel2.Controls.Add(dtpStart);
             panel2.Controls.Add(btnSearchNodes);
-            panel2.Controls.Add(redOutput);
             panel2.Controls.Add(label3);
             panel2.Controls.Add(label2);
             panel2.Controls.Add(lblNodeName);
             panel2.Controls.Add(lblNodeandEdge);
-            panel2.Location = new Point(663, 85);
+            panel2.Location = new Point(611, 12);
             panel2.Name = "panel2";
-            panel2.Size = new Size(485, 323);
+            panel2.Size = new Size(562, 323);
             panel2.TabIndex = 1;
             // 
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(255, 183);
+            label5.Location = new Point(13, 218);
             label5.Name = "label5";
             label5.Size = new Size(97, 15);
             label5.TabIndex = 10;
@@ -85,7 +87,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(255, 132);
+            label4.Location = new Point(13, 174);
             label4.Name = "label4";
             label4.Size = new Size(101, 15);
             label4.TabIndex = 9;
@@ -93,23 +95,23 @@
             // 
             // dtpEnd
             // 
-            dtpEnd.Location = new Point(255, 201);
+            dtpEnd.Location = new Point(13, 236);
             dtpEnd.Name = "dtpEnd";
-            dtpEnd.Size = new Size(200, 23);
+            dtpEnd.Size = new Size(251, 23);
             dtpEnd.TabIndex = 8;
             // 
             // dtpStart
             // 
-            dtpStart.Location = new Point(255, 155);
+            dtpStart.Location = new Point(13, 192);
             dtpStart.Name = "dtpStart";
-            dtpStart.Size = new Size(200, 23);
+            dtpStart.Size = new Size(251, 23);
             dtpStart.TabIndex = 7;
             // 
             // btnSearchNodes
             // 
-            btnSearchNodes.Location = new Point(245, 268);
+            btnSearchNodes.Location = new Point(13, 265);
             btnSearchNodes.Name = "btnSearchNodes";
-            btnSearchNodes.Size = new Size(225, 44);
+            btnSearchNodes.Size = new Size(251, 44);
             btnSearchNodes.TabIndex = 6;
             btnSearchNodes.Text = "Search";
             btnSearchNodes.UseVisualStyleBackColor = true;
@@ -117,16 +119,16 @@
             // 
             // redOutput
             // 
-            redOutput.Location = new Point(13, 132);
+            redOutput.Location = new Point(283, 14);
             redOutput.Name = "redOutput";
-            redOutput.Size = new Size(226, 180);
+            redOutput.Size = new Size(264, 295);
             redOutput.TabIndex = 5;
             redOutput.Text = "";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(13, 99);
+            label3.Location = new Point(13, 97);
             label3.Name = "label3";
             label3.Size = new Size(70, 15);
             label3.TabIndex = 4;
@@ -183,19 +185,28 @@
             // 
             // btnHome
             // 
-            btnHome.Location = new Point(663, 570);
+            btnHome.Location = new Point(611, 570);
             btnHome.Name = "btnHome";
-            btnHome.Size = new Size(485, 58);
+            btnHome.Size = new Size(562, 58);
             btnHome.TabIndex = 3;
             btnHome.Text = "Go Back Home";
             btnHome.UseVisualStyleBackColor = true;
             btnHome.Click += btnHome_Click;
             // 
+            // dataGridView1
+            // 
+            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Location = new Point(611, 341);
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.Size = new Size(562, 223);
+            dataGridView1.TabIndex = 4;
+            // 
             // frmNetworkTopology
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1160, 640);
+            ClientSize = new Size(1185, 640);
+            Controls.Add(dataGridView1);
             Controls.Add(btnHome);
             Controls.Add(panel2);
             Controls.Add(panel3);
@@ -206,6 +217,7 @@
             panel2.PerformLayout();
             panel3.ResumeLayout(false);
             panel3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             ResumeLayout(false);
         }
 
@@ -226,5 +238,6 @@
         private DateTimePicker dtpEnd;
         private DateTimePicker dtpStart;
         private Button btnSearchNodes;
+        private DataGridView dataGridView1;
     }
 }
