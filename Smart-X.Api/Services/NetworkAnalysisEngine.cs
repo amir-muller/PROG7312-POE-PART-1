@@ -64,24 +64,11 @@ public class SensorHistoryBst
 public class NetworkAnalysisEngine
 {
     private readonly Dictionary<string, Dictionary<string, double>> _adjacencyList = new(StringComparer.OrdinalIgnoreCase);
+    private List<(string Source, string Target, double Weight)> _cachedEdges = new();
+    private bool _isDirty = true; //flag to rebuild
 
     public NetworkAnalysisEngine()
     {
-        //// mesh network for testing rn
-        //AddEdge("Gateway Router", "Node A", 1.2);
-        //AddEdge("Gateway Router", "Node B", 2.5);
-        //AddEdge("Gateway Router", "Node C", 1.8);
-        //AddEdge("Node A", "Node B", 1.0);
-        //AddEdge("Node A", "Node D", 3.1);
-        //AddEdge("Node B", "Node C", 1.4);
-        //AddEdge("Node B", "Node D", 2.0);
-        //AddEdge("Node B", "Node E", 2.2);
-        //AddEdge("Node C", "Node E", 1.5);
-        //AddEdge("Node D", "Node E", 1.1);
-        //AddEdge("Node D", "Node F", 2.8);
-        //AddEdge("Node E", "Node F", 1.9);
-        //AddEdge("Node F", "Gateway Router", 4.0);
-
         EnsureGateWayExists();
     }
 
@@ -133,6 +120,7 @@ public class NetworkAnalysisEngine
         if (!_adjacencyList.ContainsKey(v)) _adjacencyList[v] = new();
         _adjacencyList[u][v] = weight;
         _adjacencyList[v][u] = weight; //undirected graph
+        _isDirty = true;
     }
 
     // Graph transversal
@@ -226,70 +214,28 @@ public class NetworkAnalysisEngine
             _adjacencyList[newNodeName] = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
         }
 
-        //gateway router always as root
         EnsureGateWayExists();
 
-        //calc to all other sensors
-        var distances = new List<(string NodeName, double Distance)>();
+        // defualt
+        AddEdge("Gateway Router", newNodeName, 2.0);
 
-        foreach (var other in allSensors)
+        // select random 3, getting 3 closest nodes are to comp expensive for the time frame of the demo vid
+        var neighbors = allSensors
+            .Where(s => !s.SensorMAC.Equals(newSensor.SensorMAC, StringComparison.OrdinalIgnoreCase) &&
+                        !s.SensorName.Equals(newNodeName, StringComparison.OrdinalIgnoreCase))
+            .Take(3) 
+            .ToList();
+
+        if (neighbors.Count == 0)
         {
-            //prevent it to check against it self
-            if (other.SensorMAC.Equals(newSensor.SensorMAC, StringComparison.OrdinalIgnoreCase) ||
-                other.SensorName.Equals(newNodeName, StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            //ensure other nodes also exists
-            if (!_adjacencyList.ContainsKey(other.SensorName))
-            {
-                _adjacencyList[other.SensorName] = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
-            }
-
-            double distance = CalculateProximityMetric(newSensor, other);
-            distances.Add((other.SensorName, distance));
+            return; 
         }
 
-        // falback to defautls with gateway router
-        if (distances.Count == 0)
-        {
-            AddEdge("Gateway Router", newNodeName, 1.5);
-            return;
+        foreach (var neighbor in neighbors)
+        {   
+            AddEdge(newNodeName, neighbor.SensorName, 1.2);
         }
 
-        //sort by dist
-        var closestNeighbors = distances.OrderBy(d => d.Distance).Take(3);
-
-        foreach (var neighbor in closestNeighbors)
-        {
-            //undirected edge
-            AddEdge(newNodeName, neighbor.NodeName, Math.Round(neighbor.Distance, 2));
-        }
-
-        // check that it conencts to the Gateway router
-        if (!_adjacencyList["Gateway Router"].ContainsKey(newNodeName))
-        {
-            AddEdge("Gateway Router", newNodeName, 2.5);
-        }
-
-    }
-
-
-    private double CalculateProximityMetric(SensorDetailsResponse a, SensorDetailsResponse b)
-    {
-        string locA = a.SensorLocation?.Trim() ?? string.Empty;
-        string locB = b.SensorLocation?.Trim() ?? string.Empty;
-
-        // if in same location smal proximity
-        if (a.SensorLocation.Equals(b.SensorLocation, StringComparison.OrdinalIgnoreCase))
-        {
-            return 1.0;
-        }
-
-        // calc distance based on mac hash
-        int hashA = Math.Abs(a.SensorMAC.GetHashCode());
-        int hashB = Math.Abs(b.SensorMAC.GetHashCode());
-
-        return Math.Abs(hashA % 50 - hashB % 50) + 2.0;
     }
 
     public List<(string Source, string Target, double Weight)> GetAllEdges()

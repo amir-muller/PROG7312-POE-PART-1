@@ -34,12 +34,10 @@ using (var scope = app.Services.CreateScope())
     var existingSensors = dataService.GetAllSensorDetailsAsync().Result;
     if (existingSensors != null && existingSensors.Any())
     {
-        // rebuild for each sensor
-        foreach (var sensor in existingSensors)
-        {
-            engine.ConnectNewNodeWithNearestNeighbors(sensor, existingSensors);
-        }
+        //rebuild graph
+        engine.BuildDynamicTopology(existingSensors);
     }
+
 }
 
 
@@ -50,19 +48,21 @@ var api = app.MapGroup("/api/data");
 //sensor details
 var sensorApi = app.MapGroup("/api/sensors");
 
-// Combined POST endpoint for registering sensors and auto-linking proximity neighbors
 sensorApi.MapPost("/", async (CreateSensorDetailsRequest request, IDataService dataService, NetworkAnalysisEngine engine, CancellationToken ct) =>
 {
     if (string.IsNullOrWhiteSpace(request.SensorMAC))
         return Results.BadRequest("MAC address is required.");
 
-    //Save to database
-    var result = await dataService.SaveSensorDetailsAsync(request, ct);
+    var cleanRequest = request with
+    {
+        SensorMAC = request.SensorMAC.Trim(),
+        SensorName = string.IsNullOrWhiteSpace(request.SensorName) ? "Sensor" : request.SensorName.Trim(),
+        SensorLocation = string.IsNullOrWhiteSpace(request.SensorLocation) ? "Sector" : request.SensorLocation.Trim()
+    };
 
-    //Get all current sensors
+    var result = await dataService.SaveSensorDetailsAsync(cleanRequest, ct);
     var allSensors = await dataService.GetAllSensorDetailsAsync(ct);
 
-    //link new node to its 3 closest neighbors based on location
     engine.ConnectNewNodeWithNearestNeighbors(result, allSensors);
 
     return Results.Created($"/api/sensors/{result.Id}", result);
@@ -142,8 +142,8 @@ topologyApi.MapGet("/mst/path", (string startNode, string targetNode, NetworkAna
 
 topologyApi.MapGet("/edges", (NetworkAnalysisEngine engine) =>
 {
-    // Exposes the engine's adjacency list to the frontend
-    var edges = engine.GetAllEdges();
+    var edges = engine.GetAllEdges()
+        .Select(e => new { e.Source, e.Target, e.Weight });
     return Results.Ok(edges);
 });
 

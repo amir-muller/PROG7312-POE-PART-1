@@ -31,7 +31,16 @@ public partial class frmNetworkTopology : Form
     public frmNetworkTopology()
     {
         InitializeComponent();
-        _ = InitializeTopologyDataAsync();
+        Load += async (_, _) =>
+        {
+            try { 
+                await InitializeTopologyDataAsync(); 
+            }
+            catch (Exception ex) 
+            { 
+                MessageBox.Show($"Topology failed: {ex.Message}"); 
+            }
+        };
     }
 
     public async Task InitializeTopologyDataAsync()
@@ -64,8 +73,9 @@ public partial class frmNetworkTopology : Form
 
         // create graph
         Graph graph = new Graph("Topology Graph");
-        graph.LayoutAlgorithmSettings = new MdsLayoutSettings();
   
+        graph.LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.Layered.SugiyamaLayoutSettings();
+
         Microsoft.Msagl.Drawing.Node gatewayNode = graph.AddNode("Gateway Router");
         gatewayNode.Attr.Shape = Shape.Circle;
         gatewayNode.Attr.FillColor = Microsoft.Msagl.Drawing.Color.LightGreen;
@@ -87,30 +97,46 @@ public partial class frmNetworkTopology : Form
         // fetch edges
         var edges = await _apiClient.GetAllEdgesAsync();
 
-        if (edges != null && edges.Count > 0)
+        if (edges != null)
         {
             foreach (var e in edges)
             {
-                // check that both nodes exicts.
+                if (string.IsNullOrEmpty(e.Source) || string.IsNullOrEmpty(e.Target))
+                    continue;
+
                 if (graph.FindNode(e.Source) != null && graph.FindNode(e.Target) != null)
                 {
-                    Microsoft.Msagl.Drawing.Edge edge = graph.AddEdge(e.Source, e.Target);
+                    var edge = graph.AddEdge(e.Source, e.Target);
                     edge.Attr.ArrowheadAtTarget = ArrowStyle.None;
                     edge.Attr.ArrowheadAtSource = ArrowStyle.None;
                 }
             }
         }
-        else
+
+        // fall back
+        if (graph.EdgeCount == 0)
         {
-            //defaults to gateway router
             foreach (var sensor in _activeSensors)
             {
-                Microsoft.Msagl.Drawing.Edge edge = graph.AddEdge("Gateway Router", sensor.SensorName);
+                var edge = graph.AddEdge("Gateway Router", sensor.SensorName);
                 edge.Attr.ArrowheadAtTarget = ArrowStyle.None;
                 edge.Attr.ArrowheadAtSource = ArrowStyle.None;
             }
         }
 
+
+        if (this.InvokeRequired)
+        {
+            this.Invoke(new Action(() => RenderGraph(graph)));
+        }
+        else
+        {
+            RenderGraph(graph);
+        }
+    }
+
+    private void RenderGraph(Graph graph)
+    {
         _viewer.Graph = graph;
         panel1.Controls.Clear();
         panel1.Controls.Add(_viewer);
@@ -176,8 +202,8 @@ public partial class frmNetworkTopology : Form
 
 
         // integrate date time clicker
-        DateTime startDate = DateTime.UtcNow.AddDays(-7);
-        DateTime endDate = DateTime.UtcNow;
+        DateTime startDate = dtpStart.Value.Date.ToUniversalTime();
+        DateTime endDate = dtpEnd.Value.Date.AddDays(1).AddTicks(-1).ToUniversalTime();
 
         try
         {
@@ -197,22 +223,19 @@ public partial class frmNetworkTopology : Form
 
             //pims algo mini spani treee
             var mstResult = await _apiClient.GetMstHopPathAsync("Gateway Router", nodeName);
-            string pathStr = (mstResult != null && mstResult.Path != null)
-                ? string.Join(" => ", mstResult.Path)
-                : nodeName;
-
+            var hopPath = mstResult?.Path ?? new List<string> { nodeName };
+            string pathStr = string.Join(" => ", Enumerable.Reverse(hopPath)); // node => gateway
             int totalHops = mstResult?.TotalHops ?? 0;
 
 
             //display results summary
             redOutput.Clear();
             redOutput.Text = $"===Network Topology Analysis===\n" +
-                             $"Selected Node: {nodeName} with MAC {_selectedSensorMac}\n\n" +
-                             $"Graph Transversel\n" +
-                             $"{subnetDevicesStr}\n\n" +
-                             $"Minimum Spanning tree (MST)\n" +
-                             $"Path hoped: {pathStr} => Gateway Router\n" +
-                             $"Total Hops: {totalHops}\n";
+                 $"Selected Node: {nodeName} with MAC {_selectedSensorMac}\n\n" +
+                 $"Graph Traversal (DFS from gateway)\n{subnetDevicesStr}\n\n" +
+                 $"Minimum Spanning Tree (Prim's)\n" +
+                 $"Hop path: {pathStr}\n" +
+                 $"Total Hops: {totalHops}\n";
         }
         catch (Exception ex)
         {

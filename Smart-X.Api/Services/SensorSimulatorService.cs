@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Smart_X.Api.DataModels;
+using SystemFrontEnd.Services;
 
 namespace Smart_X.Api.Services;
 
@@ -20,8 +21,8 @@ public class SensorSimulatorService : BackgroundService
         using var scope = _serviceProvider.CreateScope();
         var dataService = scope.ServiceProvider.GetRequiredService<IDataService>();
         var sensorManager = scope.ServiceProvider.GetRequiredService<RealTimeSensorManager>();
+        var engine = scope.ServiceProvider.GetRequiredService<NetworkAnalysisEngine>();
 
-        //for it no sensor reg
         var existingSensors = await dataService.GetAllSensorDetailsAsync(stoppingToken);
 
         if (!existingSensors.Any())
@@ -46,19 +47,20 @@ public class SensorSimulatorService : BackgroundService
             }
         }
 
+        // build the mesh from db
+        engine.BuildDynamicTopology(await dataService.GetAllSensorDetailsAsync(stoppingToken));
+
         var random = new Random();
 
-        
         while (!stoppingToken.IsCancellationRequested)
         {
             var currentSensors = await dataService.GetAllSensorDetailsAsync(stoppingToken);
 
             foreach (var sensor in currentSensors)
             {
-                //gen readings for each catagory
                 double simulatedValue = sensor.SensorCategory.Equals("Temperature", StringComparison.OrdinalIgnoreCase)
-                    ? Math.Round(random.NextDouble() * 25 + 15, 2) 
-                    : Math.Round(random.NextDouble() * 60 + 20, 2); 
+                    ? Math.Round(random.NextDouble() * 25 + 15, 2)
+                    : Math.Round(random.NextDouble() * 60 + 20, 2);
 
                 var dataRequest = new CreateSensorDataRequest(sensor.SensorMAC, simulatedValue);
                 var dataResponse = await dataService.SaveDataAsync(dataRequest, stoppingToken);
