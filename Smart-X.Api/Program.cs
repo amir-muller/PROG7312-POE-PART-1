@@ -122,6 +122,45 @@ api.MapGet("/range", async (string sensorMac, string start, string end, IDataSer
 });
 
 
+api.MapGet("/stream-state", (RealTimeSensorManager manager) =>
+    Results.Ok(manager.GetDashboardState()));
+
+api.MapPost("/process-next", (RealTimeSensorManager manager) =>
+{
+    var processed = manager.ProcessNext();
+    return processed is null ? Results.NoContent() : Results.Text(processed);
+});
+
+api.MapPost("/override", (ManualOverrideRequest request, RealTimeSensorManager manager) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Command) || request.TargetMACs is null || request.TargetMACs.Count == 0)
+        return Results.BadRequest("A command and at least one target MAC are required.");
+
+    string entry = $"{request.Command} -> {string.Join(", ", request.TargetMACs)}";
+    manager.RecordManualCommand(entry);
+    return Results.Text($"Command sent: {entry}");
+});
+
+api.MapPost("/override/undo", (RealTimeSensorManager manager) =>
+{
+    var undone = manager.UndoLastCommand();
+    return Results.Text(undone is null ? "Nothing to undo." : $"Undid: {undone}");
+});
+
+
+api.MapPost("/", async (CreateSensorDataRequest request, IDataService dataService, RealTimeSensorManager manager, CancellationToken ct) =>
+{
+    if (string.IsNullOrWhiteSpace(request.SensorMAC))
+        return Results.BadRequest("Sensor MAC address cannot be empty.");
+
+    var result = await dataService.SaveDataAsync(request, ct);
+
+    bool isCritical = result.SensorValue > 75;
+    manager.EnqueueTelemetry(result, isCritical, isCritical ? 1 : 5);
+
+    return Results.Created($"/api/data/{result.Id}", result);
+});
+
 
 //-----------------------------------------------------------------------------
 //topology analysis endpoints

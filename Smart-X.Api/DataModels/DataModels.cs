@@ -8,6 +8,9 @@ public record SensorDataResponse(Guid Id, string SensorMAC, double SensorValue, 
 public record CreateSensorDetailsRequest(string SensorMAC, string SensorLocation, string SensorName, string SensorCategory);
 public record SensorDetailsResponse(Guid Id, string SensorMAC, string SensorLocation, string SensorName, string SensorCategory);
 
+//queueing endpoint
+public record ManualOverrideRequest(string Command, List<string> TargetMACs);
+
 //file attachment endpoint
 public record SensorAttachmentResponse(
     Guid Id,

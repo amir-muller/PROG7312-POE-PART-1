@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -22,7 +23,7 @@ namespace SystemFrontEnd
 
 
         //private LightningChartUltimate chart;
-        private Chart lineChart;      
+        private Chart lineChart;
 
         public frmCommandStream()
         {
@@ -33,7 +34,7 @@ namespace SystemFrontEnd
         private async void frmCommandStream_Load(object sender, EventArgs e)
         {
             // ini the chart
-            SetupChart();           
+            SetupChart();
 
             SetupUI();
             await LoadDashboardDataAsync();
@@ -54,9 +55,19 @@ namespace SystemFrontEnd
                 cmbFilterCategory.Items.Clear();
                 cmbFilterCategory.Items.Add("All Categories");
                 cmbFilterCategory.Items.Add("Moisture");
-                cmbFilterCategory.Items.Add("Temperature"); 
+                cmbFilterCategory.Items.Add("Temperature");
                 cmbFilterCategory.SelectedIndex = 0;
             }
+
+
+            lblMocSensor.Visible = false;
+            lblStatus.AutoSize = false;
+            lblStatus.AutoEllipsis = true;
+            lblStatus.Location = new Point(3, 38);
+            lblStatus.Size = new Size(270, 34);
+
+            dgvDevices.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+
         }
 
         private async void RefreshTimer_Tick(object sender, EventArgs e)
@@ -81,6 +92,9 @@ namespace SystemFrontEnd
                 }
 
                 Search();
+
+                await RefreshQueueStateAsync();
+
             }
             catch (Exception ex)
             {
@@ -123,9 +137,20 @@ namespace SystemFrontEnd
             }
 
             var matchingDevicesList = filteredDevices.ToList();
+
             if (dgvDevices != null)
             {
+                var selectedMacs = dgvDevices.SelectedRows.Cast<DataGridViewRow>()
+                    .Select(r => (r.DataBoundItem as SensorDetailsResponse)?.SensorMAC)
+                    .OfType<string>()
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
                 dgvDevices.DataSource = matchingDevicesList;
+                dgvDevices.ClearSelection();
+
+                foreach (DataGridViewRow row in dgvDevices.Rows)
+                    if (row.DataBoundItem is SensorDetailsResponse d && selectedMacs.Contains(d.SensorMAC))
+                        row.Selected = true;
             }
 
             //filter telemertry
@@ -140,7 +165,7 @@ namespace SystemFrontEnd
                 dgvTelemetry.DataSource = filteredTelemetry;
             }
 
-            
+
             UpdateMultiSensorChart(matchingDevicesList, filteredTelemetry);
         }
 
@@ -149,7 +174,7 @@ namespace SystemFrontEnd
             if (lineChart == null) return;
 
             lineChart.Series.Clear();
-   
+
             Color[] colors = { Color.Blue, Color.Red, Color.Green, Color.Orange, Color.Purple, Color.Cyan, Color.Magenta };
             int colorIndex = 0;
 
@@ -275,22 +300,75 @@ namespace SystemFrontEnd
             Search();
         }
 
+        private string _lastAction = "";
+
+        private async Task RefreshQueueStateAsync()
+        {
+            var state = await _apiClient.GetCommandStreamStateAsync();
+            if (state == null) return;
+
+            lblStatus.Text = $"{_lastAction}\nQueue: {state["QueueCount"]} | Alerts: {state["PriorityAlertsCount"]} | Undo: {state["UndoStackCount"]}";
+
+            lstFeed.DataSource = ToStringList(state, "RecentlyProcessed");
+            lstUndo.DataSource = ToStringList(state, "UndoHistory");
+        }
+
+        private static List<string> ToStringList(Dictionary<string, object> state, string key)
+        {
+            if (state.TryGetValue(key, out var value) &&
+                value is JsonElement el && el.ValueKind == JsonValueKind.Array)
+            {
+                return el.EnumerateArray().Select(x => x.GetString() ?? "").ToList();
+            }
+            return new List<string>();
+        }
+
         private async void btnTriggerPump_Click(object sender, EventArgs e)
         {
-        //    string command = "Manual Override: Trigger Water Pump";
-        //    await _apiClient.PostManualOverrideAsync(command);
-        //    if (lblStatus != null) lblStatus.Text = $"Command Sent: {command}";
-        //    await LoadDashboardDataAsync();
+            try
+            {
+                var macs = dgvDevices.SelectedRows.Cast<DataGridViewRow>()
+                    .Select(r => (r.DataBoundItem as SensorDetailsResponse)?.SensorMAC)
+                    .OfType<string>()
+                    .ToList();
+
+                if (macs.Count == 0)
+                    macs = _allDevices.Select(d => d.SensorMAC).ToList();
+
+                _lastAction = await _apiClient.PostManualOverrideAsync("Manual Override: Trigger Water Pump", macs) ?? "Override failed";
+                await RefreshQueueStateAsync();
+            }
+            catch (Exception ex) { _lastAction = $"Error: {ex.Message}"; }
         }
 
-        private void frmCommandStream_FormClosing(object sender, FormClosingEventArgs e)
+        private async void btnUndo_Click(object sender, EventArgs e)
         {
-            RefreshTimer.Stop();
+            try
+            {
+                _lastAction = await _apiClient.UndoOverrideAsync() ?? "Undo failed";
+                await RefreshQueueStateAsync();
+            }
+            catch (Exception ex) { _lastAction = $"Error: {ex.Message}"; }
         }
 
-        private void frmCommandStream_FormClosed(object sender, FormClosedEventArgs e)
+        private async void btnNext_Click(object sender, EventArgs e)
         {
-            RefreshTimer.Stop();
+            try
+            {
+                _lastAction = await _apiClient.ProcessNextAsync() ?? "Queues are empty";
+                await RefreshQueueStateAsync();
+            }
+            catch (Exception ex) { _lastAction = $"Error: {ex.Message}"; }
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblUndo_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

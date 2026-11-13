@@ -78,10 +78,10 @@ public class ApiClient
         throw new Exception($"Upload failed: {error}");
     }
 
-    public async Task<List<SensorAttachmentResponse>?> GetAttachmentsByMacAsync(string sensorMAC)
-    {
-        return await _httpClient.GetFromJsonAsync<List<SensorAttachmentResponse>>($"api/attachments/sensor/{sensorMAC}");
-    }
+    //public async Task<List<SensorAttachmentResponse>?> GetAttachmentsByMacAsync(string sensorMAC)
+    //{
+    //    return await _httpClient.GetFromJsonAsync<List<SensorAttachmentResponse>>($"api/attachments/sensor/{sensorMAC}");
+    //}
 
 
 
@@ -116,6 +116,14 @@ public class ApiClient
             return await response.Content.ReadAsStringAsync();
         }
         return null;
+    }
+
+    public async Task<string?> ProcessNextAsync()
+    {
+        var response = await _httpClient.PostAsync("api/data/process-next", null);
+        return response.StatusCode == System.Net.HttpStatusCode.OK
+            ? await response.Content.ReadAsStringAsync()
+            : null;
     }
 
 

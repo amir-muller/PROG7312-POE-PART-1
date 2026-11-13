@@ -30,7 +30,8 @@ public class SensorSimulatorService : BackgroundService
             var seedSensors = new[]
             {
                 new CreateSensorDetailsRequest("AA:BB:CC:DD:EE:01", "Greenhouse Zone A", "Temp Sensor Alpha", "Temperature"),
-                new CreateSensorDetailsRequest("AA:BB:CC:DD:EE:02", "Field Sector 2", "Moisture Monitor Beta", "Moisture")
+                new CreateSensorDetailsRequest("AA:BB:CC:DD:EE:02", "Field Sector 2", "Moisture Monitor Beta", "Moisture"),
+                new CreateSensorDetailsRequest("92:12:33:00:00:03", "Greenhouse Zone A", "Moisture Monitor test", "Moisture")
             };
 
             foreach (var seed in seedSensors)

@@ -30,6 +30,8 @@
         {
             components = new System.ComponentModel.Container();
             panel1 = new Panel();
+            btnNext = new Button();
+            btnUndo = new Button();
             btnTriggerPump = new Button();
             lblStatus = new Label();
             label1 = new Label();
@@ -46,15 +48,25 @@
             dgvTelemetry = new DataGridView();
             RefreshTimer = new System.Windows.Forms.Timer(components);
             btnGoHome = new Button();
+            panel3 = new Panel();
+            lstUndo = new ListBox();
+            lblUndo = new Label();
+            lstFeed = new ListBox();
+            lblFeed = new Label();
+            label2 = new Label();
+            label4 = new Label();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvDevices).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvTelemetry).BeginInit();
+            panel3.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
             // 
             panel1.BackColor = SystemColors.ControlLight;
+            panel1.Controls.Add(btnNext);
+            panel1.Controls.Add(btnUndo);
             panel1.Controls.Add(btnTriggerPump);
             panel1.Controls.Add(lblStatus);
             panel1.Controls.Add(label1);
@@ -64,6 +76,26 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(276, 129);
             panel1.TabIndex = 1;
+            // 
+            // btnNext
+            // 
+            btnNext.Location = new Point(171, 76);
+            btnNext.Name = "btnNext";
+            btnNext.Size = new Size(75, 44);
+            btnNext.TabIndex = 7;
+            btnNext.Text = "Next";
+            btnNext.UseVisualStyleBackColor = true;
+            btnNext.Click += btnNext_Click;
+            // 
+            // btnUndo
+            // 
+            btnUndo.Location = new Point(90, 76);
+            btnUndo.Name = "btnUndo";
+            btnUndo.Size = new Size(75, 44);
+            btnUndo.TabIndex = 6;
+            btnUndo.Text = "Undo";
+            btnUndo.UseVisualStyleBackColor = true;
+            btnUndo.Click += btnUndo_Click;
             // 
             // btnTriggerPump
             // 
@@ -94,9 +126,10 @@
             // lblMocSensor
             // 
             lblMocSensor.AutoSize = true;
+            lblMocSensor.Font = new Font("Segoe UI", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblMocSensor.Location = new Point(3, 47);
             lblMocSensor.Name = "lblMocSensor";
-            lblMocSensor.Size = new Size(92, 15);
+            lblMocSensor.Size = new Size(107, 19);
             lblMocSensor.TabIndex = 2;
             lblMocSensor.Text = "Selected Sensor:";
             // 
@@ -180,9 +213,9 @@
             // dgvTelemetry
             // 
             dgvTelemetry.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvTelemetry.Location = new Point(620, 12);
+            dgvTelemetry.Location = new Point(620, 147);
             dgvTelemetry.Name = "dgvTelemetry";
-            dgvTelemetry.Size = new Size(485, 540);
+            dgvTelemetry.Size = new Size(485, 405);
             dgvTelemetry.TabIndex = 5;
             // 
             // btnGoHome
@@ -196,11 +229,80 @@
             btnGoHome.UseVisualStyleBackColor = false;
             btnGoHome.Click += btnGoHome_Click;
             // 
+            // panel3
+            // 
+            panel3.BackColor = SystemColors.ControlLight;
+            panel3.Controls.Add(lstUndo);
+            panel3.Controls.Add(lblUndo);
+            panel3.Controls.Add(lstFeed);
+            panel3.Controls.Add(lblFeed);
+            panel3.Controls.Add(label2);
+            panel3.Controls.Add(label4);
+            panel3.Location = new Point(620, 12);
+            panel3.Name = "panel3";
+            panel3.Size = new Size(485, 129);
+            panel3.TabIndex = 6;
+            // 
+            // lstUndo
+            // 
+            lstUndo.FormattingEnabled = true;
+            lstUndo.ItemHeight = 15;
+            lstUndo.Location = new Point(243, 33);
+            lstUndo.Name = "lstUndo";
+            lstUndo.Size = new Size(224, 79);
+            lstUndo.TabIndex = 8;
+            // 
+            // lblUndo
+            // 
+            lblUndo.AutoSize = true;
+            lblUndo.Location = new Point(243, 15);
+            lblUndo.Name = "lblUndo";
+            lblUndo.Size = new Size(105, 15);
+            lblUndo.TabIndex = 7;
+            lblUndo.Text = "Command History";
+            lblUndo.Click += lblUndo_Click;
+            // 
+            // lstFeed
+            // 
+            lstFeed.FormattingEnabled = true;
+            lstFeed.ItemHeight = 15;
+            lstFeed.Location = new Point(13, 33);
+            lstFeed.Name = "lstFeed";
+            lstFeed.Size = new Size(224, 79);
+            lstFeed.TabIndex = 6;
+            // 
+            // lblFeed
+            // 
+            lblFeed.AutoSize = true;
+            lblFeed.Location = new Point(13, 15);
+            lblFeed.Name = "lblFeed";
+            lblFeed.Size = new Size(88, 15);
+            lblFeed.TabIndex = 5;
+            lblFeed.Text = "Processed Feed";
+            lblFeed.Click += label5_Click;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(3, 157);
+            label2.Name = "label2";
+            label2.Size = new Size(0, 15);
+            label2.TabIndex = 4;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(3, 114);
+            label4.Name = "label4";
+            label4.Size = new Size(0, 15);
+            label4.TabIndex = 3;
+            // 
             // frmCommandStream
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1115, 613);
+            Controls.Add(panel3);
             Controls.Add(dgvDevices);
             Controls.Add(dgvTelemetry);
             Controls.Add(chartPanel);
@@ -209,8 +311,6 @@
             Controls.Add(btnGoHome);
             Name = "frmCommandStream";
             Text = "frmCommandStream";
-            FormClosing += frmCommandStream_FormClosing;
-            FormClosed += frmCommandStream_FormClosed;
             Load += frmCommandStream_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
@@ -218,6 +318,8 @@
             panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvDevices).EndInit();
             ((System.ComponentModel.ISupportInitialize)dgvTelemetry).EndInit();
+            panel3.ResumeLayout(false);
+            panel3.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -240,5 +342,14 @@
         private Label label1;
         private Label lblStatus;
         private Button btnTriggerPump;
+        private Button btnNext;
+        private Button btnUndo;
+        private Panel panel3;
+        private Label lblFeed;
+        private Label label2;
+        private Label label4;
+        private Label lblUndo;
+        private ListBox lstFeed;
+        private ListBox lstUndo;
     }
 }
